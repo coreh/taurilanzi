@@ -44,7 +44,7 @@ export function typeEntry(draft: KeyDraft): CatalogEntry | undefined {
 }
 
 /** Whether the type has something to set up in its dialog. */
-export function hasTypeSettings(draft: KeyDraft): boolean {
+export function hasTypeSettings(draft: Pick<KeyDraft, 'kind'>): boolean {
   return draft.kind === 'action' || draft.kind === 'widget' || draft.kind === 'carousel'
 }
 

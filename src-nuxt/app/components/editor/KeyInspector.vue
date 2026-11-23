@@ -19,7 +19,7 @@ const { t } = useI18n()
 const target = toRef(props, 'target')
 
 const { stored, draft, state, editing, shownWidget, preview, dirty, invalid, status, error, create, clear, uploadImage, pickIcon, pickAppIcon, tryKey } = useKeyEditor(target)
-const { pages } = useWorkspace()
+const { pages, keyRequest } = useWorkspace()
 const { snapshot, previewUrl } = useEngine()
 
 /** Dragging the left edge resizes the inspector; the width is kept for next time. */
@@ -53,6 +53,19 @@ watch(() => props.target && `${props.target.page}:${props.target.index}`, () => 
   configuringType.value = false
   choosingType.value = false
 })
+// After the watchers that load the key and close the dialogs of the one selected before.
+watch(keyRequest, (request) => {
+  if (!request || request.page !== props.target?.page || request.index !== props.target.index) {
+    return
+  }
+  keyRequest.value = null
+  if (request.open === 'type' || !draft.value) {
+    choosingType.value = true
+  }
+  else if (hasTypeSettings(draft.value)) {
+    configuringType.value = true
+  }
+}, { flush: 'post' })
 
 /** A new key is of the type picked first. */
 function choose(entry: CatalogEntry) {
@@ -168,7 +181,7 @@ const thumbnails = computed(() => (draft.value?.second && props.target ? [draft.
           <h2 class="text-[11px] font-semibold tracking-wider text-sky-200/70 uppercase">
             {{ t('editor.inspector.typeSection') }}
           </h2>
-          <KeyTypeSection v-model="draft" v-model:configuring="configuringType" v-model:shown-widget="shownWidget" :page="props.target.page" />
+          <KeyTypeSection v-model="draft" v-model:configuring="configuringType" v-model:changing="choosingType" v-model:shown-widget="shownWidget" :page="props.target.page" />
         </section>
 
         <section class="flex flex-col gap-3 border-b border-violet-950/70 bg-[#110e18] px-4 pt-3 pb-4" data-section="actions">

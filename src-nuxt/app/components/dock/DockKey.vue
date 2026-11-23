@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { Trash2 } from '@lucide/vue'
+import { Replace, Settings2, Trash2 } from '@lucide/vue'
+import { kindOf } from '~/composables/useKeyEditor'
+import { hasTypeSettings } from '~/lib/key-kinds'
 
 const props = defineProps<{
   page: string
@@ -18,14 +20,22 @@ const { t } = useI18n()
 const keyDrag = useKeyDrag()
 const contextMenu = useContextMenu()
 const pages = usePages()
+const { snapshot } = useEngine()
+const { setUpKey, changeKeyType } = useWorkspace()
 const slot = computed(() => ({ page: props.page, index: props.index }))
 const over = computed(() => keyDrag.isOver(slot.value))
 const lifted = computed(() => keyDrag.isDragging(slot.value))
 
 function menu(event: MouseEvent) {
-  contextMenu.open(event, props.configured
-    ? [{ label: t('dock.key.remove'), icon: Trash2, destructive: true, run: () => pages.removeKey(props.page, props.index) }]
-    : [])
+  const key = snapshot.value?.pages.find(p => p.id === props.page)?.keys[props.index]
+  const setUp = { label: t('dock.key.setUp'), icon: Settings2, run: () => setUpKey(props.page, props.index) }
+  contextMenu.open(event, props.configured && key
+    ? [
+        { ...setUp, disabled: !hasTypeSettings(kindOf(key)) },
+        { label: t('dock.key.changeType'), icon: Replace, run: () => changeKeyType(props.page, props.index) },
+        { label: t('dock.key.remove'), icon: Trash2, destructive: true, separated: true, run: () => pages.removeKey(props.page, props.index) },
+      ]
+    : [setUp])
 }
 
 function click() {

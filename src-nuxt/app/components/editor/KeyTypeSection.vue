@@ -11,13 +11,14 @@ import type { Action } from '~/types/engine'
 const draft = defineModel<KeyDraft>({ required: true })
 /** The dialog of the type's settings, open. */
 const configuring = defineModel<boolean>('configuring', { default: false })
+/** The choice of another type, open. */
+const changing = defineModel<boolean>('changing', { default: false })
 const props = defineProps<{ page: string }>()
 
 const { t } = useI18n()
 const { pages } = useWorkspace()
 const { snapshot } = useEngine()
 const { summary } = useActionSummary()
-const changing = ref(false)
 /** Which of the widgets of the key the dialog edits. */
 const shownWidget = defineModel<number>('shownWidget', { default: 0 })
 
