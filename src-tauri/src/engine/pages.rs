@@ -224,17 +224,13 @@ impl Engine {
             id: None,
         };
         let id = self.create_page(new, None, new_page)?;
-        let fresh = self
-            .owner(id)?
-            .page(id)
-            .ok_or(CommandError::UnknownPage(id))?;
-        let index = if from.index == WIDE_KEY {
-            WIDE_KEY
-        } else {
-            slots()
-                .find(|i| !fresh.keys.contains_key(i))
-                .unwrap_or(WIDE_KEY)
-        };
+        // The page holds only the copy, without the back key new pages get.
+        self.owner_mut(id)?
+            .page_mut(id)
+            .ok_or(CommandError::UnknownPage(id))?
+            .keys
+            .clear();
+        let index = if from.index == WIDE_KEY { WIDE_KEY } else { 0 };
         let to = KeySlot { page: id, index };
         if let Err(err) = self.copy_key(from, to) {
             // The page was only there for the copy.
