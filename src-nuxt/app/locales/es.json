@@ -1045,7 +1045,9 @@
     "key": {
       "label": "Tecla {n}",
       "empty": "Vacía",
-      "remove": "Eliminar tecla"
+      "remove": "Eliminar tecla",
+      "setUp": "Configurar",
+      "changeType": "Cambiar tipo de tecla"
     }
   },
   "editor": {

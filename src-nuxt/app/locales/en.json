@@ -1045,7 +1045,9 @@
     "key": {
       "label": "Key {n}",
       "empty": "Empty",
-      "remove": "Delete key"
+      "remove": "Delete key",
+      "setUp": "Set up",
+      "changeType": "Change key type"
     }
   },
   "editor": {

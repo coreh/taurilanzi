@@ -6,6 +6,8 @@ const selection = ref<KeyRef | null>(null)
 const selectedLink = ref<string | null>(null)
 /** A page the canvas should bring into view; the counter repeats requests for the same page. */
 const focusRequest = ref<{ page: string, count: number } | null>(null)
+/** A dialog of the inspector to open for a key: its type's settings, or the choice of its type. */
+const keyRequest = shallowRef<KeyRef & { open: 'setup' | 'type' } | null>(null)
 
 /** What the user is looking at and editing, shared by the canvas, the sidebar and the inspector. */
 export function useWorkspace() {
@@ -30,6 +32,18 @@ export function useWorkspace() {
     selectedLink.value = null
   }
 
+  /** Selects the key and opens what sets it up: the settings of its type, or the choice of one
+   * on an empty key. */
+  function setUpKey(page: string, index: number) {
+    select(page, index)
+    keyRequest.value = { page, index, open: 'setup' }
+  }
+
+  function changeKeyType(page: string, index: number) {
+    select(page, index)
+    keyRequest.value = { page, index, open: 'type' }
+  }
+
   function focus(page: string) {
     focusRequest.value = { page, count: (focusRequest.value?.count ?? 0) + 1 }
   }
@@ -40,5 +54,5 @@ export function useWorkspace() {
     }
   })
 
-  return { selection, selectedLink, focusRequest, pages, current, select, selectLink, clear, focus }
+  return { selection, selectedLink, focusRequest, keyRequest, pages, current, select, selectLink, clear, focus, setUpKey, changeKeyType }
 }
