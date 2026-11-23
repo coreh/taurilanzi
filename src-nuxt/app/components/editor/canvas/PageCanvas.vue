@@ -9,6 +9,7 @@ import '@vue-flow/core/dist/theme-default.css'
 import '@vue-flow/controls/dist/style.css'
 import { events } from '~/ipc/bindings'
 import { REDO_SHORTCUT, UNDO_SHORTCUT } from '~/lib/actions/keys'
+import { ARROW_DIRECTIONS } from '~/lib/key-grid'
 import type { PageNodeData } from '~/types/canvas'
 
 const FLOW = 'mesa'
@@ -20,7 +21,7 @@ const ASSISTANT_PAGES_MS = 2000
 const MEASURE_MS = 100
 
 const { snapshot, refresh } = useEngine()
-const { pages, current, focusRequest, selectedLink, clear } = useWorkspace()
+const { pages, current, focusRequest, selection, clear, moveSelection, removeSelectedKey } = useWorkspace()
 const actions = usePages()
 const colors = useLinkColors()
 const { fitView, screenToFlowCoordinate } = useVueFlow(FLOW)
@@ -167,16 +168,40 @@ async function remove(id: string) {
   await attempt(() => actions.remove(id), t('editor.canvas.errors.remove'))
 }
 
+/** Arrows, Delete and Backspace belong to the canvas only while nothing else could want them. */
+function forCanvas(event: KeyboardEvent) {
+  if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.isComposing || event.defaultPrevented) {
+    return false
+  }
+  const target = event.target
+  if (!(target instanceof Element) || (target !== document.body && !area.value?.contains(target))) {
+    return false
+  }
+  if (target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), .nokey')) {
+    return false
+  }
+  return !document.querySelector('[role="dialog"], [role="alertdialog"], [role="menu"]')
+}
+
+// Captured, so Vue Flow does not also nudge the selected page with the arrows meant for its keys.
 function keydown(event: KeyboardEvent) {
-  const typing = event.target instanceof HTMLElement && event.target.closest('input, textarea, [contenteditable]')
-  if (selectedLink.value && !typing && (event.key === 'Delete' || event.key === 'Backspace')) {
-    removeLine(selectedLink.value)
-    clear()
+  if (!selection.value || !forCanvas(event)) {
+    return
+  }
+  const direction = ARROW_DIRECTIONS[event.key]
+  if (direction) {
+    event.preventDefault()
+    event.stopPropagation()
+    moveSelection(direction)
+  }
+  else if (event.key === 'Delete' || event.key === 'Backspace') {
+    event.preventDefault()
+    attempt(removeSelectedKey, t('editor.canvas.errors.removeKey'))
   }
 }
 
-onMounted(() => window.addEventListener('keydown', keydown))
-onBeforeUnmount(() => window.removeEventListener('keydown', keydown))
+onMounted(() => window.addEventListener('keydown', keydown, true))
+onBeforeUnmount(() => window.removeEventListener('keydown', keydown, true))
 
 function focusPage(page: string) {
   fitView({ nodes: [page], padding: 0.3, maxZoom: 1.2, duration: 300 })
