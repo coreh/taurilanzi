@@ -43,6 +43,7 @@ pub fn builder() -> tauri_specta::Builder<Wry> {
             profiles::link_app,
             profiles::unlink_app,
             profiles::app_at_path,
+            assets::import_app_icon,
             profiles::running_apps,
             profiles::app_detection,
             profiles::set_up_app_detection,

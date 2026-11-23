@@ -1081,7 +1081,9 @@
       "save": "No se pudo guardar la tecla.",
       "try": "No se pudo probar la tecla.",
       "upload": "No se pudo subir la imagen. Formatos: PNG, JPG, WebP, GIF o SVG de hasta 10 MB.",
-      "icon": "No se pudo descargar el icono. Prueba de nuevo en unos segundos."
+      "icon": "No se pudo descargar el icono. Prueba de nuevo en unos segundos.",
+      "notAnApp": "Eso no es una app.",
+      "appIcon": "No se pudo leer el icono de la app."
     },
     "validation": {
       "urlMissing": "Escribe una dirección",
@@ -1115,6 +1117,9 @@
       "title": "Imagen",
       "searchIcon": "Buscar icono",
       "upload": "Subir imagen",
+      "appIcon": "Icono de app",
+      "pickApp": "Elige una app",
+      "appsFilter": "Apps",
       "editedIcon": "{icon} (editado)",
       "edited": "Imagen editada",
       "own": "Imagen propia",

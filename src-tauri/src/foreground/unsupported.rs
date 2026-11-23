@@ -2,7 +2,7 @@
 
 use std::path::Path;
 
-use super::AppDetection;
+use super::{AppDetection, AppIconError};
 use crate::config::AppRef;
 
 /// The app in front and its process.
@@ -25,6 +25,10 @@ pub fn app_at(_path: &Path) -> Option<AppRef> {
 
 pub fn app_icon(_id: &str) -> Option<Vec<u8>> {
     None
+}
+
+pub fn app_icon_at(_path: &Path, _size: u32) -> Result<Vec<u8>, AppIconError> {
+    Err(AppIconError::Unsupported)
 }
 
 pub fn detection() -> AppDetection {

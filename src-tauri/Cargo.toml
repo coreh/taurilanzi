@@ -73,7 +73,7 @@ libc = "0.2"
 objc2 = "0.6.5"
 objc2-app-kit = { version = "0.3.2", default-features = false, features = ["std", "NSEvent", "NSGraphicsContext", "NSPasteboard", "NSRunningApplication", "NSWorkspace", "objc2-core-graphics", "NSImage", "NSImageRep", "NSBitmapImageRep", "libc"] }
 objc2-core-foundation = { version = "0.3.2", default-features = false, features = ["std", "CFDictionary", "CFNumber", "CFString"] }
-objc2-core-graphics = { version = "0.3.2", default-features = false, features = ["std", "CGEvent", "CGEventSource", "CGEventTypes", "CGRemoteOperation", "CGSession", "CGImage"] }
+objc2-core-graphics = { version = "0.3.2", default-features = false, features = ["std", "CGBitmapContext", "CGColorSpace", "CGContext", "CGEvent", "CGEventSource", "CGEventTypes", "CGRemoteOperation", "CGSession", "CGImage"] }
 objc2-foundation = { version = "0.3.2", default-features = false, features = ["std", "NSArray", "NSBundle", "NSDictionary", "NSGeometry", "NSString", "NSURL", "NSValue", "NSData", "NSFileManager"] }
 objc2-io-kit = { version = "0.3.2", default-features = false, features = ["std", "libc"] }
 security-framework = "3.7.0"

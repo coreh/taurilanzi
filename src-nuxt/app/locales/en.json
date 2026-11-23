@@ -1081,7 +1081,9 @@
       "save": "Could not save the key.",
       "try": "Could not try the key.",
       "upload": "Could not upload the image. Formats: PNG, JPG, WebP, GIF or SVG up to 10 MB.",
-      "icon": "Could not download the icon. Try again in a few seconds."
+      "icon": "Could not download the icon. Try again in a few seconds.",
+      "notAnApp": "That is not an app.",
+      "appIcon": "Could not read the app's icon."
     },
     "validation": {
       "urlMissing": "Enter an address",
@@ -1115,6 +1117,9 @@
       "title": "Image",
       "searchIcon": "Search icon",
       "upload": "Upload image",
+      "appIcon": "App icon",
+      "pickApp": "Choose an app",
+      "appsFilter": "Apps",
       "editedIcon": "{icon} (edited)",
       "edited": "Edited image",
       "own": "Own image",

@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { Crop, ImagePlus, Search, Trash2, Undo2 } from '@lucide/vue'
+import { open as choose } from '@tauri-apps/plugin-dialog'
+import { AppWindow, Crop, ImagePlus, Search, Trash2, Undo2 } from '@lucide/vue'
+import { APP_FILES, os } from '~/lib/os'
 import type { PickedIcon } from '~/composables/useIconCatalog'
 import type { ImageDraft, StateDraft } from '~/composables/useKeyEditor'
 
 const draft = defineModel<StateDraft>({ required: true })
 const props = defineProps<{ wide: boolean }>()
-const emit = defineEmits<{ upload: [file: File], pickIcon: [picked: PickedIcon] }>()
+const emit = defineEmits<{ upload: [file: File], pickIcon: [picked: PickedIcon], pickApp: [path: string] }>()
 const { t } = useI18n()
 
 const input = useTemplateRef<HTMLInputElement>('input')
@@ -54,6 +56,20 @@ function pick(event: Event) {
   ;(event.target as HTMLInputElement).value = ''
 }
 
+/** Only macOS reads app icons for now (`app_icon_at` in the engine). */
+const appIcons = os === 'macos'
+
+async function pickApp() {
+  const path = await choose({
+    title: t('editor.image.pickApp'),
+    defaultPath: APP_FILES.folder,
+    filters: [{ name: t('editor.image.appsFilter'), extensions: APP_FILES.extensions }],
+  })
+  if (typeof path === 'string') {
+    emit('pickApp', path)
+  }
+}
+
 /** Any image can take one color over its shape; icons of the search start with the text's. */
 function setTint(on: boolean) {
   if (draft.value.image) {
@@ -84,6 +100,9 @@ function useOriginal() {
       </Button>
       <Button variant="outline" size="sm" @click="input?.click()">
         <ImagePlus /> {{ t('editor.image.upload') }}
+      </Button>
+      <Button v-if="appIcons" variant="outline" size="sm" class="col-span-2" @click="pickApp">
+        <AppWindow /> {{ t('editor.image.appIcon') }}
       </Button>
     </div>
 

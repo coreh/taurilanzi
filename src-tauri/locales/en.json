@@ -68,7 +68,9 @@
     "rawBytes": "send the file as raw bytes",
     "imageTooBig": "images can be up to 10 MB",
     "soundTooBig": "sounds can be up to 30 MB",
-    "unsupportedType": "use a PNG, JPEG, WebP, GIF or SVG image, or an MP3, WAV, M4A, FLAC or OGG sound"
+    "unsupportedType": "use a PNG, JPEG, WebP, GIF or SVG image, or an MP3, WAV, M4A, FLAC or OGG sound",
+    "notAnApp": "that is not an app",
+    "appIconUnsupported": "app icons can't be read on this system yet"
   },
   "actions": {
     "unsupportedUrl": "only http and https URLs can be opened",

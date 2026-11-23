@@ -34,6 +34,7 @@ permissions = [
   "allow-link-app",
   "allow-unlink-app",
   "allow-app-at-path",
+  "allow-import-app-icon",
   "allow-running-apps",
   "allow-app-detection",
   "allow-set-up-app-detection",

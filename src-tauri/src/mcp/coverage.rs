@@ -56,6 +56,7 @@ const COVERAGE: &[(&str, Cover)] = &[
     ("link_app", Tools(&["apply_changes"])),
     ("unlink_app", Tools(&["apply_changes"])),
     ("app_at_path", Tools(&["app_at_path"])),
+    ("import_app_icon", Tools(&["import_app_icon"])),
     ("running_apps", Tools(&["list_running_apps"])),
     (
         "app_detection",

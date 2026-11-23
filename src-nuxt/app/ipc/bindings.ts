@@ -72,6 +72,11 @@ export const commands = {
 	unlinkApp: (profile: string, app: string) => typedError<null, IpcError>(__TAURI_INVOKE("unlink_app", { profile, app })),
 	/**  The app at a path chosen in the file dialog. */
 	appAtPath: (path: string) => typedError<AppRef, IpcError>(__TAURI_INVOKE("app_at_path", { path })),
+	/**
+	 *  Stores the icon of the app at a path chosen in the file dialog and returns its id. The image
+	 *  is a copy, so the key keeps it on other computers and when the app changes its icon.
+	 */
+	importAppIcon: (path: string) => typedError<string, IpcError>(__TAURI_INVOKE("import_app_icon", { path })),
 	/**  Apps open now, to link one with a click. */
 	runningApps: () => __TAURI_INVOKE<AppRef[]>("running_apps"),
 	/**  Whether this desktop lets the app know which app is in front, which linked apps need. */
