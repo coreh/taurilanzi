@@ -13,7 +13,6 @@ pub enum When {
     /// The canvas of pages is on screen.
     Editor,
     /// A key is selected on the canvas, for the items that act on it.
-    #[allow(dead_code)]
     Key,
 }
 

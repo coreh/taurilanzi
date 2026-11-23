@@ -19,7 +19,7 @@ const ASSISTANT_PAGES_MS = 2000
 const MEASURE_MS = 100
 
 const { snapshot, refresh } = useEngine()
-const { pages, current, focusRequest, selection, clear, moveSelection, removeSelectedKey } = useWorkspace()
+const { pages, current, focusRequest, selection, clear, moveSelection, removeSelectedKey, setUpKey, changeKeyType } = useWorkspace()
 const actions = usePages()
 const colors = useLinkColors()
 const { fitView, screenToFlowCoordinate, zoomIn, zoomOut, zoomTo } = useVueFlow(FLOW)
@@ -205,6 +205,15 @@ useMenuCommand('view.zoomOut', () => zoomOut({ duration: 200 }))
 useMenuCommand('view.actualSize', () => zoomTo(1, { duration: 200 }))
 useMenuCommand('view.fit', () => fitView({ padding: 0.2, duration: 300 }))
 useMenuCommand('view.pageOnDock', () => current.value && focusPage(current.value))
+useMenuCommand('edit.duplicateKey', () => {
+  const key = selection.value
+  if (key && snapshot.value?.pages.find(p => p.id === key.page)?.keys[key.index]) {
+    actions.duplicateKey(key).catch(() => {})
+  }
+})
+useMenuCommand('edit.setUpKey', () => selection.value && setUpKey(selection.value.page, selection.value.index))
+useMenuCommand('edit.changeKeyType', () => selection.value && changeKeyType(selection.value.page, selection.value.index))
+useMenuCommand('edit.deleteKey', () => removeSelectedKey())
 
 watch(focusRequest, (request) => {
   if (request) {

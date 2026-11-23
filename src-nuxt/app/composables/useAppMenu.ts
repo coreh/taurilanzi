@@ -20,8 +20,20 @@ export function useMenuCommand(command: string, run: Run) {
   })
 }
 
+/** Menu shortcuts reach the app even under a dialog, where they would act on what it covers;
+ * only undoing typing in one of its fields goes through. */
+function blockedByDialog(command: string) {
+  if (!document.querySelector('[role="dialog"], [role="alertdialog"]')) {
+    return false
+  }
+  return !((command === 'edit.undo' || command === 'edit.redo') && typingIn(document.activeElement))
+}
+
 /** A command nobody handles is of a view that is not on screen, whose items are disabled. */
 function dispatch(command: string) {
+  if (blockedByDialog(command)) {
+    return
+  }
   const run = handlers.get(command)
   if (run) {
     Promise.resolve(run()).catch(() => {})

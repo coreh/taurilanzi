@@ -172,6 +172,23 @@ fn edit(b: &mut Builder) -> tauri::Result<Submenu<Wry>> {
                 When::Redo,
             )?,
             &b.separator()?,
+            &b.ui(
+                "edit.duplicateKey",
+                tr!("menu.edit.duplicateKey"),
+                Some("CmdOrCtrl+D"),
+                When::Key,
+            )?,
+            &b.ui("edit.setUpKey", tr!("menu.edit.setUpKey"), None, When::Key)?,
+            &b.ui(
+                "edit.changeKeyType",
+                tr!("menu.edit.changeKeyType"),
+                None,
+                When::Key,
+            )?,
+            // No accelerator: Backspace and Delete belong to text fields first; the canvas
+            // handles them for the selected key.
+            &b.ui("edit.deleteKey", tr!("menu.edit.deleteKey"), None, When::Key)?,
+            &b.separator()?,
             &PredefinedMenuItem::cut(b.app, Some(tr!("menu.edit.cut")))?,
             &PredefinedMenuItem::copy(b.app, Some(tr!("menu.edit.copy")))?,
             &PredefinedMenuItem::paste(b.app, Some(tr!("menu.edit.paste")))?,
