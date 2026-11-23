@@ -187,7 +187,12 @@ fn edit(b: &mut Builder) -> tauri::Result<Submenu<Wry>> {
             )?,
             // No accelerator: Backspace and Delete belong to text fields first; the canvas
             // handles them for the selected key.
-            &b.ui("edit.deleteKey", tr!("menu.edit.deleteKey"), None, When::Key)?,
+            &b.ui(
+                "edit.deleteKey",
+                tr!("menu.edit.deleteKey"),
+                None,
+                When::Key,
+            )?,
             &b.separator()?,
             &PredefinedMenuItem::cut(b.app, Some(tr!("menu.edit.cut")))?,
             &PredefinedMenuItem::copy(b.app, Some(tr!("menu.edit.copy")))?,
