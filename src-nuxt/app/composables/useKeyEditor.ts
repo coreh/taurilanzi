@@ -516,7 +516,7 @@ export function useKeyEditor(target: Ref<KeyRef | null>) {
     load()
     return true
   }
-  const forget = registerPendingEdit(discardPending)
+  const forget = registerPendingEdit(discardPending, () => status.value === 'pending')
 
   onBeforeUnmount(() => {
     flush()

@@ -76,6 +76,7 @@ pub fn run() {
     #[cfg(target_os = "macos")]
     {
         builder = builder
+            .manage(app_menu::MenuBar::default())
             .menu(app_menu::build)
             .on_menu_event(|app, event| app_menu::on_menu(app, event.id().as_ref()));
     }

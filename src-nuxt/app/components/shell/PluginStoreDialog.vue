@@ -151,6 +151,9 @@ async function rescan() {
 /** What is waiting for the user to accept running code nobody checked. */
 type Pending = { kind: 'store', plugin: Plugin } | { kind: 'zip' | 'folder' }
 const pending = ref<Pending | null>(null)
+useMenuCommand('file.installPluginFile', () => { pending.value = { kind: 'zip' } })
+useMenuCommand('file.installPluginFolder', () => { pending.value = { kind: 'folder' } })
+useMenuCommand('file.reloadPlugins', rescan)
 const confirming = computed({
   get: () => pending.value !== null,
   set: (value) => {

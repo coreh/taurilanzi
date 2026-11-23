@@ -1,17 +1,20 @@
-import { commands, events } from '~/ipc/bindings'
+import { commands } from '~/ipc/bindings'
 import { os } from '~/lib/os'
 
-/** Editors with changes not saved yet; undo drops those first, as they are the latest. */
-const pending = new Set<() => boolean>()
+/** Editors with changes not saved yet, and whether each has some now; undo drops those first,
+ * as they are the latest. */
+const pending = shallowReactive(new Map<() => boolean, () => boolean>())
 let listening = false
 
-export function registerPendingEdit(discard: () => boolean) {
-  pending.add(discard)
+export function registerPendingEdit(discard: () => boolean, isPending: () => boolean = () => false) {
+  pending.set(discard, isPending)
   return () => pending.delete(discard)
 }
 
+const hasPending = computed(() => [...pending.values()].some(isPending => isPending()))
+
 async function undo() {
-  for (const discard of pending) {
+  for (const discard of pending.keys()) {
     if (discard()) {
       return
     }
@@ -23,7 +26,7 @@ async function redo() {
   await call(commands.redo())
 }
 
-function typingIn(element: Element | null) {
+export function typingIn(element: EventTarget | null) {
   return element instanceof HTMLTextAreaElement
     || (element instanceof HTMLInputElement && !['checkbox', 'radio', 'range', 'color', 'file', 'button'].includes(element.type))
     || (element instanceof HTMLElement && element.isContentEditable)
@@ -44,33 +47,24 @@ function historyKey(event: KeyboardEvent): 'undo' | 'redo' | null {
 export function useHistory() {
   const { snapshot } = useEngine()
 
-  if (!listening && import.meta.client) {
+  // On macOS the menu bar takes the keys (useAppMenu).
+  if (!listening && import.meta.client && os !== 'macos') {
     listening = true
-    if (os === 'macos') {
-      events.historyShortcut.listen(({ payload }) => {
-        if (typingIn(document.activeElement)) {
-          document.execCommand(payload.redo ? 'redo' : 'undo')
-          return
-        }
-        ;(payload.redo ? redo() : undo()).catch(() => {})
-      })
-    }
-    else {
-      // Without a menu bar the window gets the keys itself; text fields keep their own undo.
-      window.addEventListener('keydown', (event) => {
-        const wanted = historyKey(event)
-        if (wanted === null || typingIn(document.activeElement)) {
-          return
-        }
-        event.preventDefault()
-        ;(wanted === 'redo' ? redo() : undo()).catch(() => {})
-      })
-    }
+    // Without a menu bar the window gets the keys itself; text fields keep their own undo.
+    window.addEventListener('keydown', (event) => {
+      const wanted = historyKey(event)
+      if (wanted === null || typingIn(document.activeElement)) {
+        return
+      }
+      event.preventDefault()
+      ;(wanted === 'redo' ? redo() : undo()).catch(() => {})
+    })
   }
 
   return {
     canUndo: computed(() => snapshot.value?.can_undo ?? false),
     canRedo: computed(() => snapshot.value?.can_redo ?? false),
+    hasPending,
     undo,
     redo,
   }

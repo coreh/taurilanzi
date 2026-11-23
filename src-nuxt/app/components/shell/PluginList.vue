@@ -11,6 +11,7 @@ const store = useStorePlugins()
 const { t } = useI18n()
 const { recommendation } = useMcp()
 const browsing = ref(false)
+useMenuCommand('file.pluginStore', () => { browsing.value = true })
 
 watch(recommendation, (plugin) => {
   if (plugin) {
