@@ -27,6 +27,8 @@ const { fitView, screenToFlowCoordinate } = useVueFlow(FLOW)
 const contextMenu = useContextMenu()
 const history = useHistory()
 const { t } = useI18n()
+const area = ref<HTMLElement | null>(null)
+useCanvasGestures(FLOW, area)
 
 const error = ref<string | null>(null)
 const renaming = ref<{ id: string, name: string } | null>(null)
@@ -189,7 +191,7 @@ watch(focusRequest, (request) => {
 </script>
 
 <template>
-  <div class="mesa relative size-full">
+  <div ref="area" class="mesa relative size-full">
     <VueFlow
       :id="FLOW"
       :nodes="nodes"
