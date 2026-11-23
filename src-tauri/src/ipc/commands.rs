@@ -42,6 +42,25 @@ pub async fn move_key(engine: State<'_, EngineHandle>, from: KeySlot, to: KeySlo
     Ok(engine.move_key(from, to).await?)
 }
 
+/// Replaces whatever is at `to` with a copy of the key at `from`.
+#[tauri::command]
+#[specta::specta]
+pub async fn copy_key(engine: State<'_, EngineHandle>, from: KeySlot, to: KeySlot) -> Result<()> {
+    Ok(engine.copy_key(from, to).await?)
+}
+
+/// Copies the key to the nearest free place of its page, or to a new page at `new_page` when the
+/// page is full, and answers where the copy went.
+#[tauri::command]
+#[specta::specta]
+pub async fn duplicate_key(
+    engine: State<'_, EngineHandle>,
+    from: KeySlot,
+    new_page: Position,
+) -> Result<KeySlot> {
+    Ok(engine.duplicate_key(from, new_page).await?)
+}
+
 #[tauri::command]
 #[specta::specta]
 pub async fn create_page(

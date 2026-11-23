@@ -7,6 +7,11 @@ const selectedLink = ref<string | null>(null)
 /** A page the canvas should bring into view; the counter repeats requests for the same page. */
 const focusRequest = ref<{ page: string, count: number } | null>(null)
 
+/** Asks the canvas to bring a page into view. */
+export function focusPage(page: string) {
+  focusRequest.value = { page, count: (focusRequest.value?.count ?? 0) + 1 }
+}
+
 /** What the user is looking at and editing, shared by the canvas, the sidebar and the inspector. */
 export function useWorkspace() {
   const { snapshot } = useEngine()
@@ -30,15 +35,11 @@ export function useWorkspace() {
     selectedLink.value = null
   }
 
-  function focus(page: string) {
-    focusRequest.value = { page, count: (focusRequest.value?.count ?? 0) + 1 }
-  }
-
   watch(pages, (list) => {
     if (selection.value && !list.some(p => p.id === selection.value!.page)) {
       selection.value = null
     }
   })
 
-  return { selection, selectedLink, focusRequest, pages, current, select, selectLink, clear, focus }
+  return { selection, selectedLink, focusRequest, pages, current, select, selectLink, clear, focus: focusPage }
 }

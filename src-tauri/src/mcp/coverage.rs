@@ -19,6 +19,8 @@ const COVERAGE: &[(&str, Cover)] = &[
     ("set_key", Tools(&["set_key", "apply_changes"])),
     ("clear_key", Tools(&["set_key", "apply_changes"])),
     ("move_key", Tools(&["apply_changes"])),
+    ("copy_key", Tools(&["apply_changes"])),
+    ("duplicate_key", Tools(&["apply_changes"])),
     ("create_page", Tools(&["apply_changes"])),
     ("update_page", Tools(&["apply_changes"])),
     ("duplicate_page", Tools(&["apply_changes"])),

@@ -12,6 +12,13 @@ export const commands = {
 	/**  Removes the key, and with it the line that leaves from it. */
 	clearKey: (page: string, index: number) => typedError<null, IpcError>(__TAURI_INVOKE("clear_key", { page, index })),
 	moveKey: (from: KeySlot, to: KeySlot) => typedError<null, IpcError>(__TAURI_INVOKE("move_key", { from, to })),
+	/**  Replaces whatever is at `to` with a copy of the key at `from`. */
+	copyKey: (from: KeySlot, to: KeySlot) => typedError<null, IpcError>(__TAURI_INVOKE("copy_key", { from, to })),
+	/**
+	 *  Copies the key to the nearest free place of its page, or to a new page at `new_page` when the
+	 *  page is full, and answers where the copy went.
+	 */
+	duplicateKey: (from: KeySlot, newPage: Position) => typedError<KeySlot, IpcError>(__TAURI_INVOKE("duplicate_key", { from, newPage })),
 	createPage: (name: string | null, position: Position) => typedError<string, IpcError>(__TAURI_INVOKE("create_page", { name, position })),
 	updatePage: (page: string, changes: PageChanges) => typedError<null, IpcError>(__TAURI_INVOKE("update_page", { page, changes })),
 	duplicatePage: (page: string) => typedError<string, IpcError>(__TAURI_INVOKE("duplicate_page", { page })),

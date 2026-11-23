@@ -6,6 +6,8 @@ permissions = [
   "allow-set-key",
   "allow-clear-key",
   "allow-move-key",
+  "allow-copy-key",
+  "allow-duplicate-key",
   "allow-create-page",
   "allow-update-page",
   "allow-duplicate-page",

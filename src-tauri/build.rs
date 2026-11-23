@@ -4,6 +4,8 @@ const COMMANDS: &[&str] = &[
     "set_key",
     "clear_key",
     "move_key",
+    "copy_key",
+    "duplicate_key",
     "create_page",
     "update_page",
     "duplicate_page",

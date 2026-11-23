@@ -1045,6 +1045,7 @@
     "key": {
       "label": "Tecla {n}",
       "empty": "Vacía",
+      "duplicate": "Duplicar tecla",
       "remove": "Eliminar tecla"
     }
   },

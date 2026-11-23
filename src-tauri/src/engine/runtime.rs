@@ -382,6 +382,18 @@ impl Engine {
                 let result = self.edit(Target::Other, |e| e.move_key(from, to));
                 self.respond(reply, result);
             }
+            Command::CopyKey { from, to, reply } => {
+                let result = self.edit(Target::Other, |e| e.copy_key(from, to));
+                self.respond(reply, result);
+            }
+            Command::DuplicateKey {
+                from,
+                new_page,
+                reply,
+            } => {
+                let result = self.edit(Target::Other, |e| e.duplicate_key(from, new_page));
+                self.respond(reply, result);
+            }
             Command::PressKey {
                 page,
                 index,

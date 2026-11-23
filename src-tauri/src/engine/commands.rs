@@ -43,6 +43,8 @@ pub enum CommandError {
     UnknownApp,
     #[error("the id {0} is already used by a page or a profile")]
     IdTaken(Uuid),
+    #[error("there is no key at {0} to copy")]
+    EmptyKey(u8),
     #[error("no key has the plugin placement {0}")]
     UnknownPlacement(Uuid),
     #[error("change {at}: {error}")]
@@ -80,6 +82,10 @@ pub enum Change {
         key: Option<Key>,
     },
     MoveKey {
+        from: KeySlot,
+        to: KeySlot,
+    },
+    CopyKey {
         from: KeySlot,
         to: KeySlot,
     },
@@ -217,6 +223,19 @@ pub enum Command {
         to: KeySlot,
         reply: Done,
     },
+    /// Puts a copy of a key in another place, on its page or another one, replacing what is there.
+    CopyKey {
+        from: KeySlot,
+        to: KeySlot,
+        reply: Done,
+    },
+    /// Copies a key to the nearest free place of its page, or to a new page at `new_page` when it
+    /// is full; answers where the copy went.
+    DuplicateKey {
+        from: KeySlot,
+        new_page: Position,
+        reply: Reply<Result<KeySlot, CommandError>>,
+    },
     /// Runs a key's actions as if it had been pressed, so they can be tried without the dock.
     PressKey {
         page: Uuid,
@@ -347,6 +366,8 @@ impl Command {
                 | Self::SetHomePage { .. }
                 | Self::ShowPage { .. }
                 | Self::MoveKey { .. }
+                | Self::CopyKey { .. }
+                | Self::DuplicateKey { .. }
                 | Self::PressKey { .. }
                 | Self::Undo(_)
                 | Self::Redo(_)

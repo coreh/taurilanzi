@@ -49,6 +49,14 @@ pub enum ChangeInput {
         to_page: String,
         to_index: u8,
     },
+    /// Puts a copy of a key in a slot of its profile, replacing what was there. The copy's
+    /// plugin actions are placements of their own, with the same settings.
+    CopyKey {
+        from_page: String,
+        from_index: u8,
+        to_page: String,
+        to_index: u8,
+    },
     /// A new page comes with a back key in slot 0. Without `position` it goes to the right of the
     /// rightmost page of the canvas.
     CreatePage {
@@ -347,6 +355,21 @@ impl Assistant {
                 to_page,
                 to_index,
             } => Change::MoveKey {
+                from: KeySlot {
+                    page: names.resolve(&from_page, "page")?,
+                    index: from_index,
+                },
+                to: KeySlot {
+                    page: names.resolve(&to_page, "page")?,
+                    index: to_index,
+                },
+            },
+            ChangeInput::CopyKey {
+                from_page,
+                from_index,
+                to_page,
+                to_index,
+            } => Change::CopyKey {
                 from: KeySlot {
                     page: names.resolve(&from_page, "page")?,
                     index: from_index,

@@ -15,6 +15,8 @@ pub fn builder() -> tauri_specta::Builder<Wry> {
             commands::set_key,
             commands::clear_key,
             commands::move_key,
+            commands::copy_key,
+            commands::duplicate_key,
             commands::create_page,
             commands::update_page,
             commands::duplicate_page,

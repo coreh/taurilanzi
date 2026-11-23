@@ -1045,6 +1045,7 @@
     "key": {
       "label": "Key {n}",
       "empty": "Empty",
+      "duplicate": "Duplicate key",
       "remove": "Delete key"
     }
   },
