@@ -1,6 +1,7 @@
+use std::collections::HashSet;
 use std::sync::Arc;
 
-use resvg::usvg::fontdb::Database;
+use resvg::usvg::fontdb::{Database, ID};
 
 use super::cache::RenderCache;
 use super::design::KeyDesign;
@@ -10,6 +11,8 @@ use super::{fonts, svg};
 /// Turns key designs into PNGs, caching identical results.
 pub struct Renderer {
     fonts: Arc<Database>,
+    /// Faces whose file is already mapped; see [`Renderer::keep_mapped`].
+    mapped: HashSet<ID>,
     cache: RenderCache,
 }
 
@@ -21,6 +24,7 @@ impl Renderer {
     pub fn with_fonts(fonts: Arc<Database>) -> Self {
         Self {
             fonts,
+            mapped: HashSet::new(),
             cache: RenderCache::default(),
         }
     }
@@ -35,9 +39,36 @@ impl Renderer {
         if let Some(png) = self.cache.get(key) {
             return Ok(png);
         }
-        let png = Arc::new(rasterize::to_png(&svg, size, &self.fonts)?);
+        let (png, used) = rasterize::to_png(&svg, size, &self.fonts)?;
+        self.keep_mapped(used);
+        let png = Arc::new(png);
         self.cache.insert(key, Arc::clone(&png));
         Ok(png)
+    }
+
+    /// System fonts are only indexed by path, so without this every glyph outline usvg needs
+    /// opens and maps the font file again, which made text several times slower to draw than the
+    /// shapes around it. A face that has been drawn with stays mapped from then on: only its pages
+    /// that are read take memory, and the system can drop them under pressure.
+    fn keep_mapped(&mut self, used: Vec<ID>) {
+        let fresh: Vec<ID> = used
+            .into_iter()
+            .filter(|id| !self.mapped.contains(id))
+            .collect();
+        if fresh.is_empty() {
+            return;
+        }
+        // Nothing else holds the database between renders; if something does, try again later.
+        let Some(db) = Arc::get_mut(&mut self.fonts) else {
+            return;
+        };
+        for id in fresh {
+            // SAFETY: font files are not expected to change on disk while the app runs.
+            unsafe {
+                db.make_shared_face_data(id);
+            }
+            self.mapped.insert(id);
+        }
     }
 
     pub fn font_families(&self) -> Vec<String> {

@@ -2571,7 +2571,7 @@ mod tests {
                 ..KeyDesign::solid(Color::rgb(24, 24, 27))
             };
             for (name, size) in [("wide", (452, 196)), ("square", (196, 196))] {
-                let png = rasterize::to_png(&svg::build(&design, size), size, &fonts).unwrap();
+                let (png, _) = rasterize::to_png(&svg::build(&design, size), size, &fonts).unwrap();
                 std::fs::write(dir.join(format!("{i:02}-{name}.png")), png).unwrap();
             }
         }
