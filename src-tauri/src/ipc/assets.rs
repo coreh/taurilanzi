@@ -1,8 +1,11 @@
+use std::path::PathBuf;
+
 use tauri::State;
 use tauri::ipc::{InvokeBody, Request};
 
 use super::error::{ErrorKind, IpcError};
 use crate::config::{AssetStore, SoundFormat};
+use crate::foreground::{self, AppIconError, KEY_ICON_SIZE};
 use crate::render::ImageFormat;
 
 const MAX_IMAGE_BYTES: usize = 10 * 1024 * 1024;
@@ -40,4 +43,28 @@ pub async fn put_asset(
         return Err(invalid(tr!("assets.unsupportedType")));
     };
     stored.map_err(|err| IpcError::new(ErrorKind::Failed, err.to_string()))
+}
+
+/// Stores the icon of the app at a path chosen in the file dialog and returns its id. The image
+/// is a copy, so the key keeps it on other computers and when the app changes its icon.
+#[tauri::command]
+#[specta::specta]
+pub async fn import_app_icon(
+    path: String,
+    assets: State<'_, AssetStore>,
+) -> Result<String, IpcError> {
+    let path = PathBuf::from(path);
+    let png =
+        tauri::async_runtime::spawn_blocking(move || foreground::app_icon_at(&path, KEY_ICON_SIZE))
+            .await
+            .map_err(|err| IpcError::new(ErrorKind::Failed, err.to_string()))?
+            .map_err(|err| match err {
+                AppIconError::NotAnApp => IpcError::new(ErrorKind::Invalid, tr!("assets.notAnApp")),
+                AppIconError::Unsupported => {
+                    IpcError::new(ErrorKind::Unavailable, tr!("assets.appIconUnsupported"))
+                }
+            })?;
+    assets
+        .put(ImageFormat::Png, &png)
+        .map_err(|err| IpcError::new(ErrorKind::Failed, err.to_string()))
 }

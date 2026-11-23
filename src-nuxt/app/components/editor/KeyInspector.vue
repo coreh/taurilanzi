@@ -18,7 +18,7 @@ const props = defineProps<{ target: KeyRef | null }>()
 const { t } = useI18n()
 const target = toRef(props, 'target')
 
-const { stored, draft, state, editing, shownWidget, preview, dirty, invalid, status, error, create, clear, uploadImage, pickIcon, tryKey } = useKeyEditor(target)
+const { stored, draft, state, editing, shownWidget, preview, dirty, invalid, status, error, create, clear, uploadImage, pickIcon, pickAppIcon, tryKey } = useKeyEditor(target)
 const { pages } = useWorkspace()
 const { snapshot, previewUrl } = useEngine()
 
@@ -228,7 +228,7 @@ const thumbnails = computed(() => (draft.value?.second && props.target ? [draft.
             </div>
           </div>
           <BackgroundFields v-model="state" />
-          <ImageFields v-model="state" :wide="wide" @upload="uploadImage" @pick-icon="pickIcon" />
+          <ImageFields v-model="state" :wide="wide" @upload="uploadImage" @pick-icon="pickIcon" @pick-app="pickAppIcon" />
           <TextFields v-model="state" />
         </section>
       </ScrollArea>

@@ -167,7 +167,7 @@ Check these before sending:
 7. Ranges: text size 10-80, weights 400-900 in hundreds, image inset 0-0.45, gradient angle 0-360,
    volume 0-100, delay up to 60000 ms.
 8. Every image and sound must be in the asset store first: `import_icon`, `import_image`,
-   `import_sound`. Never invent an asset id.
+   `import_app_icon`, `import_sound`. Never invent an asset id.
 9. OBS and Home Assistant actions and widgets point to an integration of the right kind by its id
    (`integrations` of `get_overview`). Add one with `save_integration` if there is none.
 10. A key with a second state has no gestures.
@@ -197,7 +197,8 @@ put it first.
 ### Open an app
 
 `path` is the app on this computer (ask the user if you do not know it; `app_at_path` checks it).
-A photo or logo from `import_image` uses `"fit": "cover", "inset": 0` and no tint.
+A photo or logo from `import_image` uses `"fit": "cover", "inset": 0` and no tint; on macOS,
+`import_app_icon` with the same path answers a layer with the app's own icon.
 
 ```json key
 { "kind": "action",

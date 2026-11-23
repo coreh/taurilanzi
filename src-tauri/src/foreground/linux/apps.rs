@@ -4,6 +4,7 @@ use std::collections::HashSet;
 use std::path::Path;
 
 use crate::config::AppRef;
+use crate::foreground::AppIconError;
 use crate::os::linux::{self, Entry};
 
 /// Apps with a launcher entry that have a process running, apart from this one, by name.
@@ -46,6 +47,11 @@ pub fn app_at(path: &Path) -> Option<AppRef> {
 /// The icon of the installed app with this id, as a PNG.
 pub fn app_icon(id: &str) -> Option<Vec<u8>> {
     linux::icon_png(&linux::entry(id)?.icon?)
+}
+
+/// Unsupported until it is tried on Linux: `icon_png` draws at the size of the linked apps' list.
+pub fn app_icon_at(_path: &Path, _size: u32) -> Result<Vec<u8>, AppIconError> {
+    Err(AppIconError::Unsupported)
 }
 
 pub fn app_ref(entry: Entry) -> AppRef {

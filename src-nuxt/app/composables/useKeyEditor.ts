@@ -358,6 +358,8 @@ function actionError(action: Action, servers?: string[]): string | null {
 
 /** Quiet time after the last change before it is saved. */
 const AUTOSAVE_MS = 500
+/** App icons bring a margin of their own, so less than the 0.22 of searched icons. */
+const APP_ICON_INSET = 0.08
 const LIVE_MS = 1000
 
 export type SaveStatus = 'saved' | 'pending' | 'saving' | 'error'
@@ -635,5 +637,17 @@ export function useKeyEditor(target: Ref<KeyRef | null>) {
     }
   }
 
-  return { stored, draft, state, editing, shownWidget, preview, dirty, invalid, status, error, create, clear, uploadImage, pickIcon, tryKey }
+  /** A copy of the icon, not the app's path: the key keeps it on other computers and after updates. */
+  async function pickAppIcon(path: string) {
+    error.value = null
+    try {
+      const asset = await call(commands.importAppIcon(path))
+      setImage({ asset, source: asset, crop: null, fit: 'contain', inset: APP_ICON_INSET, tint: null, icon: null })
+    }
+    catch (err) {
+      error.value = err instanceof EngineError && err.kind === 'invalid' ? t('editor.errors.notAnApp') : t('editor.errors.appIcon')
+    }
+  }
+
+  return { stored, draft, state, editing, shownWidget, preview, dirty, invalid, status, error, create, clear, uploadImage, pickIcon, pickAppIcon, tryKey }
 }

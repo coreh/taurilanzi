@@ -1,3 +1,4 @@
+mod app_icons;
 mod detection;
 #[cfg(target_os = "linux")]
 mod linux;
@@ -17,6 +18,7 @@ use self::macos as platform;
 use self::unsupported as platform;
 #[cfg(target_os = "windows")]
 use self::windows as platform;
+pub use app_icons::{AppIconError, KEY_ICON_SIZE};
 pub use detection::AppDetection;
-pub use platform::{app_at, app_icon, detection, running_apps, set_up_detection};
+pub use platform::{app_at, app_icon, app_icon_at, detection, running_apps, set_up_detection};
 pub use watcher::watch;

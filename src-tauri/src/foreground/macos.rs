@@ -4,12 +4,17 @@ use std::path::Path;
 use objc2::AllocAnyThread;
 use objc2::rc::autoreleasepool;
 use objc2_app_kit::{
-    NSApplicationActivationPolicy, NSBitmapImageFileType, NSBitmapImageRep, NSRunningApplication,
-    NSWorkspace,
+    NSApplicationActivationPolicy, NSBitmapImageFileType, NSBitmapImageRep, NSImage,
+    NSRunningApplication, NSWorkspace,
+};
+use objc2_core_foundation::{CGPoint, CGRect, CGSize};
+use objc2_core_graphics::{
+    CGBitmapContextCreate, CGBitmapContextCreateImage, CGColorSpace, CGContext, CGImage,
+    CGImageAlphaInfo, CGInterpolationQuality, kCGColorSpaceSRGB,
 };
 use objc2_foundation::{NSBundle, NSDictionary, NSFileManager, NSPoint, NSRect, NSSize, NSString};
 
-use super::AppDetection;
+use super::{AppDetection, AppIconError};
 use crate::config::AppRef;
 
 /// Points; the UI shows icons at a third of this, so they stay sharp on Retina screens.
@@ -77,20 +82,69 @@ pub fn app_icon(id: &str) -> Option<Vec<u8>> {
         let path = workspace
             .URLForApplicationWithBundleIdentifier(&NSString::from_str(id))?
             .path()?;
-        let icon = workspace.iconForFile(&path);
-        let mut rect = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(ICON_SIZE, ICON_SIZE));
-        // SAFETY: `rect` outlives the call, and no hints are passed.
-        let image = unsafe { icon.CGImageForProposedRect_context_hints(&mut rect, None, None) }?;
-        let bitmap = NSBitmapImageRep::initWithCGImage(NSBitmapImageRep::alloc(), &image);
-        // SAFETY: an empty dictionary is a valid set of properties.
-        let png = unsafe {
-            bitmap.representationUsingType_properties(
-                NSBitmapImageFileType::PNG,
-                &NSDictionary::new(),
-            )
-        }?;
-        Some(png.to_vec())
+        png_of(&workspace.iconForFile(&path), ICON_SIZE)
     })
+}
+
+/// The icon of the app bundle at `path`, as a PNG of `size` pixels a side.
+pub fn app_icon_at(path: &Path, size: u32) -> Result<Vec<u8>, AppIconError> {
+    let path = path.to_str().ok_or(AppIconError::NotAnApp)?;
+    autoreleasepool(|_| {
+        let path = NSString::from_str(path);
+        // Any folder opens as a bundle; only apps carry an identifier.
+        NSBundle::bundleWithPath(&path)
+            .and_then(|bundle| bundle.bundleIdentifier())
+            .ok_or(AppIconError::NotAnApp)?;
+        let icon = NSWorkspace::sharedWorkspace().iconForFile(&path);
+        png_at(&icon, size).ok_or(AppIconError::NotAnApp)
+    })
+}
+
+/// `size` in points: drawn without a context, the image has the screen's scale.
+fn png_of(icon: &NSImage, size: f64) -> Option<Vec<u8>> {
+    let mut rect = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(size, size));
+    // SAFETY: `rect` outlives the call, and no hints are passed.
+    let image = unsafe { icon.CGImageForProposedRect_context_hints(&mut rect, None, None) }?;
+    encode(&image)
+}
+
+/// Exactly `pixels` a side whatever the screen, from the icon's picture at least that large.
+fn png_at(icon: &NSImage, pixels: u32) -> Option<Vec<u8>> {
+    let side = f64::from(pixels);
+    let mut rect = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(side, side));
+    // SAFETY: `rect` outlives the call, and no hints are passed.
+    let image = unsafe { icon.CGImageForProposedRect_context_hints(&mut rect, None, None) }?;
+    // SAFETY: a static of Core Graphics, alive for the whole process.
+    let space = CGColorSpace::with_name(Some(unsafe { kCGColorSpaceSRGB }))?;
+    // SAFETY: without a buffer of ours, Core Graphics allocates and frees the pixels itself.
+    let context = unsafe {
+        CGBitmapContextCreate(
+            std::ptr::null_mut(),
+            pixels as usize,
+            pixels as usize,
+            8,
+            0,
+            Some(&space),
+            CGImageAlphaInfo::PremultipliedLast.0,
+        )
+    }?;
+    CGContext::set_interpolation_quality(Some(&context), CGInterpolationQuality::High);
+    CGContext::draw_image(
+        Some(&context),
+        CGRect::new(CGPoint::new(0.0, 0.0), CGSize::new(side, side)),
+        Some(&image),
+    );
+    let scaled = CGBitmapContextCreateImage(Some(&context))?;
+    encode(&scaled)
+}
+
+fn encode(image: &CGImage) -> Option<Vec<u8>> {
+    let bitmap = NSBitmapImageRep::initWithCGImage(NSBitmapImageRep::alloc(), image);
+    // SAFETY: an empty dictionary is a valid set of properties.
+    let png = unsafe {
+        bitmap.representationUsingType_properties(NSBitmapImageFileType::PNG, &NSDictionary::new())
+    }?;
+    Some(png.to_vec())
 }
 
 fn app_ref(running: &NSRunningApplication) -> Option<AppRef> {
@@ -118,4 +172,24 @@ pub fn detection() -> AppDetection {
 
 pub fn set_up_detection() -> std::io::Result<AppDetection> {
     Ok(AppDetection::Ready)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Writes Calculator's icon to the temporary folder, to look at it.
+    #[test]
+    #[ignore]
+    fn draws_an_app_icon_at_its_size() {
+        let png = app_icon_at(Path::new("/System/Applications/Calculator.app"), 256).unwrap();
+        assert_eq!(png[16..24], [0, 0, 1, 0, 0, 0, 1, 0]);
+        let out = std::env::temp_dir().join("calculator-icon.png");
+        std::fs::write(&out, &png).unwrap();
+        println!("{}", out.display());
+        assert!(matches!(
+            app_icon_at(Path::new("/System"), 256),
+            Err(AppIconError::NotAnApp)
+        ));
+    }
 }

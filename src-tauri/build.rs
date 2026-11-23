@@ -32,6 +32,7 @@ const COMMANDS: &[&str] = &[
     "link_app",
     "unlink_app",
     "app_at_path",
+    "import_app_icon",
     "running_apps",
     "app_detection",
     "set_up_app_detection",

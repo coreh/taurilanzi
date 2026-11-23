@@ -11,6 +11,7 @@ use ureq::Agent;
 
 use super::context::{Answer, json, refused};
 use crate::config::SoundFormat;
+use crate::foreground::{self, AppIconError, KEY_ICON_SIZE};
 use crate::mcp::handler::Assistant;
 use crate::render::ImageFormat;
 
@@ -20,6 +21,8 @@ const MAX_SOUND_BYTES: u64 = 30 * 1024 * 1024;
 const MAX_ICONS: usize = 64;
 /// How the editor frames an icon: a margin around it, the whole of it shown.
 const ICON_INSET: f32 = 0.22;
+/// App icons bring a margin of their own.
+const APP_ICON_INSET: f32 = 0.08;
 
 #[derive(Deserialize, JsonSchema)]
 pub struct ImportParams {
@@ -27,6 +30,12 @@ pub struct ImportParams {
     pub path: Option<String>,
     /// Or an http(s) address to download it from.
     pub url: Option<String>,
+}
+
+#[derive(Deserialize, JsonSchema)]
+pub struct AppParams {
+    /// The app on this computer, by its full path: a `.app` bundle on macOS.
+    pub path: String,
 }
 
 #[derive(Deserialize, JsonSchema)]
@@ -185,6 +194,41 @@ impl Assistant {
         match self.tools.assets.put(format, &bytes) {
             Ok(asset) => json(json!({ "asset": asset })),
             Err(err) => refused(format!("could not store the image: {err}")),
+        }
+    }
+
+    #[tool(
+        description = "Stores the icon of an app on this computer as an image for keys (a copy, which keeps working on other computers). Only on macOS for now. Answers its asset id and the image layer the editor would make of it."
+    )]
+    async fn import_app_icon(&self, Parameters(params): Parameters<AppParams>) -> Answer {
+        let path = std::path::PathBuf::from(params.path);
+        let png = match tokio::task::spawn_blocking(move || {
+            foreground::app_icon_at(&path, KEY_ICON_SIZE)
+        })
+        .await
+        {
+            Ok(Ok(png)) => png,
+            Ok(Err(AppIconError::NotAnApp)) => return refused("that path is not an app"),
+            Ok(Err(AppIconError::Unsupported)) => {
+                return refused("app icons can only be read on macOS for now");
+            }
+            Err(err) => return refused(err.to_string()),
+        };
+        match self.tools.assets.put(ImageFormat::Png, &png) {
+            Ok(asset) => json(json!({
+                "asset": asset,
+                "layer": {
+                    "type": "image",
+                    "asset": asset,
+                    "source": asset,
+                    "fit": "contain",
+                    "inset": APP_ICON_INSET,
+                    "tint": null,
+                    "icon": null,
+                    "crop": null,
+                },
+            })),
+            Err(err) => refused(format!("could not store the icon: {err}")),
         }
     }
 
