@@ -6,7 +6,7 @@ import { newKeyAppearance } from '~/lib/new-key'
 import { t } from '~/lib/i18n'
 import { kindOf } from '~/composables/useKeyEditor'
 
-const NAVIGATION = new Set<Action['type']>(['open_page', 'back', 'home', 'previous_page', 'next_page', 'switch_profile'])
+const NAVIGATION = new Set<Action['type']>(['open_page', 'back', 'home', 'previous_page', 'next_page', 'switch_profile', 'previous_profile', 'next_profile'])
 
 export function isNavigation(action: Action) {
   return NAVIGATION.has(action.type)

@@ -163,6 +163,16 @@
           "description": "Moves the dock to another profile, where it was left",
           "keywords": "profile, preset, configuration"
         },
+        "previousProfile": {
+          "name": "Previous profile",
+          "description": "The previous one in the order of the profile list; before the first, the last",
+          "keywords": "profile, preset, configuration, prev, back, cycle"
+        },
+        "nextProfile": {
+          "name": "Next profile",
+          "description": "The next one in the order of the profile list; after the last, the first",
+          "keywords": "profile, preset, configuration, next, forward, cycle"
+        },
         "pageIndicator": {
           "name": "Page indicator",
           "description": "The key shows which page the dock is on",
@@ -1022,6 +1032,8 @@
       "hotkey": "Presses the shortcut {keys}",
       "openPage": "Goes to the page {name}",
       "switchProfile": "Switches to the profile {name}",
+      "previousProfile": "Switches to the previous profile in the list",
+      "nextProfile": "Switches to the next profile in the list",
       "delay": "Waits {seconds} s",
       "random": "Runs its only action | Runs one of {n} actions at random",
       "playSound": "Plays {name}",

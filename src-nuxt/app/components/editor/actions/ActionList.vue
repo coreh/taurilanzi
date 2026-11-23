@@ -55,7 +55,7 @@ function unavailable(entry: CatalogEntry) {
 }
 
 /** Actions that have nothing to set up open no dialog when added. */
-const NOTHING_TO_SET: Action['type'][] = ['back', 'home', 'previous_page', 'next_page', 'stop_sounds']
+const NOTHING_TO_SET: Action['type'][] = ['back', 'home', 'previous_page', 'next_page', 'previous_profile', 'next_profile', 'stop_sounds']
 
 // The gestures for "when" an action runs; `actions.list.gestures` has their labels, which also
 // head their groups.

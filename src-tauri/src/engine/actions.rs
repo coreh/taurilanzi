@@ -98,32 +98,49 @@ impl Engine {
             Action::Home => self.navigate(|nav, profile| nav.home(profile)),
             Action::PreviousPage => self.step_page(-1),
             Action::NextPage => self.step_page(1),
-            Action::SwitchProfile { profile } => {
-                if let Err(err) = self.set_profile(profile) {
-                    warn!("could not switch profile: {err}");
-                }
-            }
+            Action::SwitchProfile { profile } => self.switch_profile(profile),
+            Action::PreviousProfile => self.step_profile(-1),
+            Action::NextProfile => self.step_profile(1),
             _ => {}
+        }
+    }
+
+    fn switch_profile(&mut self, profile: Uuid) {
+        if let Err(err) = self.set_profile(profile) {
+            warn!("could not switch profile: {err}");
         }
     }
 
     /// In the order of the profile's pages, wrapping around, so one key can cycle through all.
     fn step_page(&mut self, by: isize) {
         self.navigate(|nav, profile| {
-            let count = profile.pages.len() as isize;
-            if count < 2 {
-                return false;
+            let ids: Vec<Uuid> = profile.pages.iter().map(|page| page.id).collect();
+            match neighbor(&ids, nav.current(profile), by) {
+                Some(next) => nav.open(profile, next),
+                None => false,
             }
-            let current = nav.current(profile);
-            let at = profile
-                .pages
-                .iter()
-                .position(|page| page.id == current)
-                .unwrap_or(0) as isize;
-            let next = profile.pages[(at + by).rem_euclid(count) as usize].id;
-            nav.open(profile, next)
         });
     }
+
+    /// In the order of the profile list, wrapping around. Profiles linked to apps are included:
+    /// the list, the menu bar and a key that switches to one all choose them by hand too.
+    fn step_profile(&mut self, by: isize) {
+        let ids: Vec<Uuid> = self.config.profiles.iter().map(|p| p.id).collect();
+        if let Some(next) = neighbor(&ids, self.config.active_profile, by) {
+            self.switch_profile(next);
+        }
+    }
+}
+
+/// The item `by` places away from `current`, going around the ends; from the first one when
+/// `current` is not among them. None when there is nowhere else to go.
+fn neighbor(items: &[Uuid], current: Uuid, by: isize) -> Option<Uuid> {
+    let count = items.len() as isize;
+    if count < 2 {
+        return None;
+    }
+    let at = items.iter().position(|id| *id == current).unwrap_or(0) as isize;
+    Some(items[(at + by).rem_euclid(count) as usize])
 }
 
 /// Each list of a key follows the rules of a list; the line on the canvas is only for a simple
@@ -355,6 +372,18 @@ mod tests {
             }]),
             Err(CommandError::UnknownProfile(_))
         ));
+    }
+
+    #[test]
+    fn stepping_goes_around_the_ends() {
+        let ids: Vec<Uuid> = (0..3).map(|_| Uuid::new_v4()).collect();
+        assert_eq!(neighbor(&ids, ids[0], 1), Some(ids[1]));
+        assert_eq!(neighbor(&ids, ids[2], 1), Some(ids[0]));
+        assert_eq!(neighbor(&ids, ids[0], -1), Some(ids[2]));
+        assert_eq!(neighbor(&ids, ids[1], -1), Some(ids[0]));
+        assert_eq!(neighbor(&ids, Uuid::new_v4(), 1), Some(ids[1]));
+        assert_eq!(neighbor(&ids[..1], ids[0], 1), None);
+        assert_eq!(neighbor(&[], ids[0], -1), None);
     }
 
     #[test]

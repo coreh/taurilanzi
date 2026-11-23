@@ -163,6 +163,16 @@
           "description": "Pasa el dock a otro perfil, donde se quedó",
           "keywords": "perfil, preset, configuración"
         },
+        "previousProfile": {
+          "name": "Perfil anterior",
+          "description": "El anterior en el orden de la lista de perfiles; antes del primero, el último",
+          "keywords": "perfil, preset, configuración, prev, ciclo"
+        },
+        "nextProfile": {
+          "name": "Perfil siguiente",
+          "description": "El siguiente en el orden de la lista de perfiles; tras el último, el primero",
+          "keywords": "perfil, preset, configuración, next, ciclo"
+        },
         "pageIndicator": {
           "name": "Indicador de página",
           "description": "La tecla muestra en qué página está el dock",
@@ -1022,6 +1032,8 @@
       "hotkey": "Pulsa el atajo {keys}",
       "openPage": "Va a la página {name}",
       "switchProfile": "Cambia al perfil {name}",
+      "previousProfile": "Cambia al perfil anterior de la lista",
+      "nextProfile": "Cambia al perfil siguiente de la lista",
       "delay": "Espera {seconds} s",
       "random": "Hace su única acción | Hace una de {n} acciones al azar",
       "playSound": "Reproduce {name}",

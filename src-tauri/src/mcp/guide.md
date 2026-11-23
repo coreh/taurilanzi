@@ -129,6 +129,7 @@ key. Prefer an icon with a short label over a sentence.
 | `open_page` | `page`: a page of the same profile, not the key's own page |
 | `back`, `home`, `previous_page`, `next_page` | none |
 | `switch_profile` | `profile` |
+| `previous_profile`, `next_profile` | none: the profile before or after the active one, in the order of `get_overview`, going around the ends |
 | `delay` | `ms`: up to 60000 |
 | `random` | `actions`: one is picked on each press |
 | `play_sound` | `sound`, `name`, `volume` 0-100, `mode`: `overlap`, `restart`, `toggle` or `loop`, `device`: null or a name from `list_audio_outputs` |
@@ -152,8 +153,8 @@ Linux; `control` is Ctrl; `option` is ⌥ / Alt. So copy is `command` + `KeyC` o
 Check these before sending:
 
 1. A list moves the dock at most once: one of `open_page`, `back`, `home`, `previous_page`,
-   `next_page` or `switch_profile` per list (`actions`, `double_press`, `long_press`,
-   `second_state.actions`).
+   `next_page`, `switch_profile`, `previous_profile` or `next_profile` per list (`actions`,
+   `double_press`, `long_press`, `second_state.actions`).
 2. `open_page` only in `actions` (the simple press), to another page of the same profile.
 3. A plugin action is `actions[0]` of an `action` key, alone of its kind (one plugin action per
    key), never in gestures, never with a second state. The plugin draws the key.

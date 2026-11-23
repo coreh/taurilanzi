@@ -111,6 +111,10 @@ export function useActionSummary() {
         const profile = snapshot.value?.profiles.find(p => p.id === action.profile)
         return profile ? t('actions.summary.switchProfile', { name: profile.name }) : t('editor.validation.switchProfile')
       }
+      case 'previous_profile':
+        return t('actions.summary.previousProfile')
+      case 'next_profile':
+        return t('actions.summary.nextProfile')
       case 'delay':
         return t('actions.summary.delay', { seconds: (action.ms / 1000).toLocaleString(locale.value, { maximumFractionDigits: 1 }) })
       case 'random':
