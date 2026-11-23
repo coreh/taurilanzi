@@ -53,6 +53,9 @@ pub enum Action {
     SwitchProfile {
         profile: Uuid,
     },
+    /// The profile before or after the one on the dock, in the order of the profile list.
+    PreviousProfile,
+    NextProfile,
     /// Waits before the next action of the list.
     Delay {
         ms: u32,
@@ -159,6 +162,8 @@ impl Action {
                 | Self::PreviousPage
                 | Self::NextPage
                 | Self::SwitchProfile { .. }
+                | Self::PreviousProfile
+                | Self::NextProfile
         )
     }
 

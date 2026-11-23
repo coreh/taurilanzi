@@ -186,6 +186,8 @@ waypoints?: Position[] } |
 { type: "back" } | { type: "home" } | 
 /**  The page before or after the current one, in the order of the profile's pages. */
 { type: "previous_page" } | { type: "next_page" } | { type: "switch_profile"; profile: string } | 
+/**  The profile before or after the one on the dock, in the order of the profile list. */
+{ type: "previous_profile" } | { type: "next_profile" } | 
 /**  Waits before the next action of the list. */
 { type: "delay"; ms: number } | 
 /**  Runs one of the actions, picked at random on each press. */

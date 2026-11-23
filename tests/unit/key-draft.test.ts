@@ -9,7 +9,7 @@ import * as obs from '../../src-nuxt/app/lib/actions/obs'
 // useKeyEditor relies on Nuxt's `~` alias and auto-imports, which bun does not provide.
 Object.assign(globalThis, { toRaw })
 mock.module('~/ipc/bindings', () => ({ commands: {} }))
-const NAVIGATION = ['open_page', 'back', 'home', 'previous_page', 'next_page', 'switch_profile']
+const NAVIGATION = ['open_page', 'back', 'home', 'previous_page', 'next_page', 'switch_profile', 'previous_profile', 'next_profile']
 mock.module('~/composables/usePages', () => ({ isNavigation: (action: Action) => NAVIGATION.includes(action.type) }))
 mock.module('~/lib/color', () => color)
 mock.module('~/lib/iconify', () => ({ iconSvg: async () => '' }))

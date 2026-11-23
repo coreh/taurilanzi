@@ -92,7 +92,9 @@ pub fn run(action: &Action, context: &Context) -> Result<(), ActionError> {
         | Action::Home
         | Action::PreviousPage
         | Action::NextPage
-        | Action::SwitchProfile { .. } => Ok(()),
+        | Action::SwitchProfile { .. }
+        | Action::PreviousProfile
+        | Action::NextProfile => Ok(()),
     }
 }
 
