@@ -50,6 +50,7 @@ impl Engine {
         match change {
             Change::SetKey { page, index, key } => self.set_key(page, index, key),
             Change::MoveKey { from, to } => self.move_key(from, to),
+            Change::CopyKey { from, to } => self.copy_key(from, to),
             Change::CreatePage {
                 profile,
                 id,

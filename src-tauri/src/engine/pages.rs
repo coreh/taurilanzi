@@ -7,6 +7,7 @@ use uuid::Uuid;
 use super::commands::{CommandError, KeySlot, PageChanges};
 use super::runtime::{Engine, check_index};
 use crate::config::{Action, Key, Page, Position, back_key};
+use crate::driver::d200::{COLUMNS, KEY_COUNT, WIDE_KEY};
 
 /// Where a new page's back key goes.
 const BACK_KEY: u8 = 0;
@@ -170,6 +171,77 @@ impl Engine {
         Ok(())
     }
 
+    /// The copy replaces whatever is at the destination and is a key of its own: its plugin
+    /// placements get new ids, so the plugin tells it apart from the original.
+    pub(super) fn copy_key(&mut self, from: KeySlot, to: KeySlot) -> Result<(), CommandError> {
+        check_index(from.index)?;
+        check_index(to.index)?;
+        if from == to {
+            return Ok(());
+        }
+        let profile = self.owner(from.page)?;
+        if profile.page(to.page).is_none() {
+            return Err(CommandError::UnknownPage(to.page));
+        }
+        let mut copy = profile
+            .page(from.page)
+            .and_then(|p| p.keys.get(&from.index))
+            .cloned()
+            .ok_or(CommandError::EmptyKey(from.index))?;
+        Self::renew_plugin_ids(std::iter::once(&mut copy));
+        drop_link_to(&mut copy, to.page);
+        self.set_key(to.page, to.index, Some(copy))
+    }
+
+    /// Copies a key to the free slot of its page nearest to it. On a full page the copy goes to
+    /// a new page at `new_page`: to its wide key if it came from one, to its first free slot
+    /// otherwise.
+    pub(super) fn duplicate_key(
+        &mut self,
+        from: KeySlot,
+        new_page: Position,
+    ) -> Result<KeySlot, CommandError> {
+        check_index(from.index)?;
+        let profile = self.owner(from.page)?;
+        let page = profile
+            .page(from.page)
+            .ok_or(CommandError::UnknownPage(from.page))?;
+        if !page.keys.contains_key(&from.index) {
+            return Err(CommandError::EmptyKey(from.index));
+        }
+        let (owner, nearest) = (profile.id, nearest_free(page, from.index));
+        if let Some(index) = nearest {
+            let to = KeySlot {
+                page: from.page,
+                index,
+            };
+            self.copy_key(from, to)?;
+            return Ok(to);
+        }
+        let before = self.config.profiles.clone();
+        let new = NewPage {
+            profile: Some(owner),
+            id: None,
+        };
+        let id = self.create_page(new, None, new_page)?;
+        let fresh = self.owner(id)?.page(id).ok_or(CommandError::UnknownPage(id))?;
+        let index = if from.index == WIDE_KEY {
+            WIDE_KEY
+        } else {
+            slots()
+                .find(|i| !fresh.keys.contains_key(i))
+                .unwrap_or(WIDE_KEY)
+        };
+        let to = KeySlot { page: id, index };
+        if let Err(err) = self.copy_key(from, to) {
+            // The page was only there for the copy.
+            self.config.profiles = before;
+            self.save()?;
+            return Err(err);
+        }
+        Ok(to)
+    }
+
     pub(super) fn show_page(&mut self, id: Uuid) -> Result<(), CommandError> {
         if self.profile()?.page(id).is_none() {
             return Err(CommandError::UnknownPage(id));
@@ -191,6 +263,32 @@ fn drop_link_to(key: &mut Key, page: Uuid) {
     key.actions.retain(
         |action| !matches!(action, Action::OpenPage { page: target, .. } if *target == page),
     );
+}
+
+fn slots() -> impl Iterator<Item = u8> {
+    (0..KEY_COUNT).chain([WIDE_KEY])
+}
+
+/// Where a slot sits on the dock, in half cells so the wide key's middle is a whole number.
+fn place(index: u8) -> (i32, i32) {
+    if index == WIDE_KEY {
+        (7, 4)
+    } else {
+        (i32::from(index % COLUMNS) * 2, i32::from(index / COLUMNS) * 2)
+    }
+}
+
+/// The free slot closest to `index`. Among equally close ones, those on its row win, then
+/// those after it, as one reads.
+fn nearest_free(page: &Page, index: u8) -> Option<u8> {
+    let (x, y) = place(index);
+    slots()
+        .filter(|i| !page.keys.contains_key(i))
+        .min_by_key(|&i| {
+            let (ix, iy) = place(i);
+            let (dx, dy) = (ix - x, iy - y);
+            (dx * dx + dy * dy, dy.abs(), i < index, i)
+        })
 }
 
 fn clean_name(name: &str) -> String {

@@ -1057,6 +1057,7 @@
     "key": {
       "label": "Tecla {n}",
       "empty": "Vacía",
+      "duplicate": "Duplicar tecla",
       "remove": "Eliminar tecla",
       "setUp": "Configurar",
       "changeType": "Cambiar tipo de tecla"

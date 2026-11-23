@@ -194,6 +194,24 @@ impl EngineHandle {
             .await?
     }
 
+    pub async fn copy_key(&self, from: KeySlot, to: KeySlot) -> Result<(), CommandError> {
+        self.ask(|reply| Command::CopyKey { from, to, reply })
+            .await?
+    }
+
+    pub async fn duplicate_key(
+        &self,
+        from: KeySlot,
+        new_page: Position,
+    ) -> Result<KeySlot, CommandError> {
+        self.ask(|reply| Command::DuplicateKey {
+            from,
+            new_page,
+            reply,
+        })
+        .await?
+    }
+
     pub async fn press_key(
         &self,
         page: Uuid,

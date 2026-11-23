@@ -13,8 +13,6 @@ import { ARROW_DIRECTIONS } from '~/lib/key-grid'
 import type { PageNodeData } from '~/types/canvas'
 
 const FLOW = 'mesa'
-const CARD = { width: 320, height: 240 }
-const GAP = 80
 /** How recent pages must be to count as the assistant's when it says it edited. */
 const ASSISTANT_PAGES_MS = 2000
 /** Time for new pages to be measured before fitting the view to them. */
@@ -114,15 +112,9 @@ function moved(event: NodeDragEvent) {
 /** Fitting has to wait until the new page has been measured. */
 let fitAfterAdd = false
 
-/** New pages go to the right of the rightmost one, so they never cover another. */
 async function addPage() {
-  const list = pages.value
-  const right = list.reduce((max, p) => (p.position.x > max.position.x ? p : max), list[0]!)
-  const position = right
-    ? { x: right.position.x + CARD.width + GAP, y: right.position.y }
-    : { x: 0, y: 0 }
   fitAfterAdd = true
-  await attempt(() => actions.create(position).then(refresh), t('editor.canvas.errors.create'))
+  await attempt(() => actions.create(actions.nextPosition()).then(refresh), t('editor.canvas.errors.create'))
 }
 
 function initialized() {

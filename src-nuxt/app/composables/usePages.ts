@@ -1,10 +1,18 @@
 import type { DeepReadonly } from 'vue'
 import { commands } from '~/ipc/bindings'
 import type { Action, Key, Page, Position } from '~/types/engine'
+import { focusPage } from '~/composables/useWorkspace'
+import type { KeyRef } from '~/composables/useWorkspace'
 import type { NewKeyStyle } from '~/lib/new-key'
 import { newKeyAppearance } from '~/lib/new-key'
 import { t } from '~/lib/i18n'
 import { kindOf } from '~/composables/useKeyEditor'
+
+/** A page card on the canvas and the space left after it. */
+const CARD_WIDTH = 320
+const CARD_GAP = 80
+/** Time for a new page to be measured before the canvas can bring it into view. */
+const MEASURE_MS = 100
 
 const NAVIGATION = new Set<Action['type']>(['open_page', 'back', 'home', 'previous_page', 'next_page', 'switch_profile', 'previous_profile', 'next_profile'])
 
@@ -25,7 +33,7 @@ export function withLink(actions: Action[], target: string, afterFirst = false):
 
 /** Page and line edits from the canvas, saved straight away. */
 export function usePages() {
-  const { snapshot } = useEngine()
+  const { snapshot, refresh } = useEngine()
 
   function page(id: string): DeepReadonly<Page> | undefined {
     return snapshot.value?.pages.find(p => p.id === id)
@@ -33,6 +41,13 @@ export function usePages() {
 
   function newKeyStyle() {
     return snapshot.value!.preferences.new_keys as NewKeyStyle
+  }
+
+  /** New pages go to the right of the rightmost one, so they never cover another. */
+  function nextPosition(): Position {
+    const list = snapshot.value?.pages ?? []
+    const right = list.reduce<DeepReadonly<Page> | undefined>((max, p) => (!max || p.position.x > max.position.x ? p : max), undefined)
+    return right ? { x: right.position.x + CARD_WIDTH + CARD_GAP, y: right.position.y } : { x: 0, y: 0 }
   }
 
   async function create(position: Position, name?: string) {
@@ -84,6 +99,22 @@ export function usePages() {
     await saveKey(pageId, index, key)
   }
 
+  /** Replaces whatever is at `to` with a copy of the key at `from`. */
+  async function copyKey(from: KeyRef, to: KeyRef) {
+    await call(commands.copyKey(from, to))
+  }
+
+  /** Copies a key to the nearest free place of its page; a full page sends it to a new page,
+   * which the canvas then brings into view. Answers where the copy went. */
+  async function duplicateKey(from: KeyRef) {
+    const to = await call(commands.duplicateKey(from, nextPosition()))
+    if (to.page !== from.page) {
+      await refresh()
+      setTimeout(() => focusPage(to.page), MEASURE_MS)
+    }
+    return to
+  }
+
   /** Deleting a key takes its line with it, and the other way round. */
   async function removeKey(pageId: string, index: number) {
     await call(commands.clearKey(pageId, index))
@@ -100,5 +131,5 @@ export function usePages() {
     await saveKey(pageId, index, { ...(structuredClone(toRaw(existing)) as Key), actions })
   }
 
-  return { page, create, update, duplicate, remove, setHome, show, link, removeKey, setWaypoints }
+  return { page, nextPosition, create, update, duplicate, remove, setHome, show, link, copyKey, duplicateKey, removeKey, setWaypoints }
 }

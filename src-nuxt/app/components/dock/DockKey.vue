@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Replace, Settings2, Trash2 } from '@lucide/vue'
+import { Copy, Replace, Settings2, Trash2 } from '@lucide/vue'
 import { kindOf } from '~/composables/useKeyEditor'
 import { hasTypeSettings } from '~/lib/key-kinds'
 
@@ -24,7 +24,8 @@ const { snapshot } = useEngine()
 const { setUpKey, changeKeyType } = useWorkspace()
 const slot = computed(() => ({ page: props.page, index: props.index }))
 const over = computed(() => keyDrag.isOver(slot.value))
-const lifted = computed(() => keyDrag.isDragging(slot.value))
+const dragged = computed(() => keyDrag.isDragging(slot.value))
+const copying = computed(() => dragged.value && keyDrag.isCopying())
 
 function menu(event: MouseEvent) {
   const key = snapshot.value?.pages.find(p => p.id === props.page)?.keys[props.index]
@@ -33,6 +34,7 @@ function menu(event: MouseEvent) {
     ? [
         { ...setUp, disabled: !hasTypeSettings(kindOf(key)) },
         { label: t('dock.key.changeType'), icon: Replace, run: () => changeKeyType(props.page, props.index) },
+        { label: t('dock.key.duplicate'), icon: Copy, separated: true, run: () => pages.duplicateKey(slot.value) },
         { label: t('dock.key.remove'), icon: Trash2, destructive: true, separated: true, run: () => pages.removeKey(props.page, props.index) },
       ]
     : [setUp])
@@ -62,8 +64,8 @@ function click() {
         props.compact ? 'ring-offset-1' : 'ring-offset-2',
         over ? 'ring-2 ring-sky-400' : props.selected ? 'ring-2 ring-white' : 'hover:ring-2 hover:ring-neutral-600',
         props.pressed ? 'scale-95 brightness-125' : '',
-        lifted ? 'opacity-30' : '',
-        props.configured ? 'cursor-grab' : '',
+        dragged && !copying ? 'opacity-30' : '',
+        copying ? 'cursor-copy' : props.configured ? 'cursor-grab' : '',
       ]"
       @pointerdown="keyDrag.press($event, slot, props.configured ? props.imageUrl : null, Boolean(props.wide))"
       @pointermove="keyDrag.move"

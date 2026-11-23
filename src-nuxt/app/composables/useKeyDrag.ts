@@ -1,5 +1,6 @@
 import { commands } from '~/ipc/bindings'
 import type { KeyRef } from '~/composables/useWorkspace'
+import { os } from '~/lib/os'
 
 /** Pixels the pointer must travel before a press on a key becomes a drag. */
 const THRESHOLD = 5
@@ -11,12 +12,37 @@ interface Drag {
   x: number
   y: number
   over: KeyRef | null
+  /** Dropping leaves the key where it was and puts a copy at the destination. */
+  copy: boolean
 }
 
 const drag = shallowRef<Drag | null>(null)
 let pending: { from: KeyRef, image: string | null, wide: boolean, x: number, y: number } | null = null
 /** A drag ends with a click on the key it started from; that click must not select it. */
 let swallowClick = false
+
+/** Option on a Mac, as Finder copies; Ctrl elsewhere, where Alt-dragging moves windows. */
+function copying(event: { altKey: boolean, ctrlKey: boolean }) {
+  return os === 'macos' ? event.altKey : event.ctrlKey
+}
+
+/** The modifier can be pressed or let go while the key is held still. */
+function modifierChanged(event: KeyboardEvent) {
+  if (drag.value && drag.value.copy !== copying(event)) {
+    drag.value = { ...drag.value, copy: copying(event) }
+  }
+}
+
+function listenToModifier(on: boolean) {
+  for (const type of ['keydown', 'keyup'] as const) {
+    if (on) {
+      window.addEventListener(type, modifierChanged)
+    }
+    else {
+      window.removeEventListener(type, modifierChanged)
+    }
+  }
+}
 
 function slotAt(x: number, y: number): KeyRef | null {
   const el = document.elementFromPoint(x, y)?.closest<HTMLElement>('[data-key-slot]')
@@ -26,7 +52,8 @@ function slotAt(x: number, y: number): KeyRef | null {
   return { page: el.dataset.page, index: Number(el.dataset.index) }
 }
 
-/** Moving keys by dragging them onto another place of any page on the canvas. */
+/** Moving keys by dragging them onto another place of any page on the canvas, or copying them
+ * there with the modifier held. */
 export function useKeyDrag() {
 
   function press(event: PointerEvent, from: KeyRef, image: string | null, wide: boolean) {
@@ -45,6 +72,9 @@ export function useKeyDrag() {
       return
     }
     const from = drag.value ?? pending!
+    if (!drag.value) {
+      listenToModifier(true)
+    }
     pending = null
     drag.value = {
       from: from.from,
@@ -53,21 +83,26 @@ export function useKeyDrag() {
       x: event.clientX,
       y: event.clientY,
       over: slotAt(event.clientX, event.clientY),
+      copy: copying(event),
     }
   }
 
-  async function release() {
+  async function release(event?: PointerEvent) {
     pending = null
     const done = drag.value
     if (!done) {
       return
     }
     drag.value = null
+    listenToModifier(false)
     swallowClick = true
     const to = done.over
-    if (to && (to.page !== done.from.page || to.index !== done.from.index)) {
-      await call(commands.moveKey(done.from, to))
+    if (!to || (to.page === done.from.page && to.index === done.from.index)) {
+      return
     }
+    // A cancelled pointer says nothing of the keys; the last thing seen of them stands.
+    const copy = event?.type === 'pointerup' ? copying(event) : done.copy
+    await call(copy ? commands.copyKey(done.from, to) : commands.moveKey(done.from, to))
   }
 
   /** True once for the click that follows a drag. */
@@ -87,5 +122,9 @@ export function useKeyDrag() {
     return Boolean(from && from.page === slot.page && from.index === slot.index)
   }
 
-  return { drag, press, move, release, consumeClick, isOver, isDragging }
+  function isCopying() {
+    return Boolean(drag.value?.copy)
+  }
+
+  return { drag, press, move, release, consumeClick, isOver, isDragging, isCopying }
 }

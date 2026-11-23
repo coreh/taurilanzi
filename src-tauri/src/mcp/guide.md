@@ -307,7 +307,8 @@ A new profile comes with an empty home page; `home_name` names it for the same c
 ```
 
 Other changes: `clear_key {page, index}`, `move_key {from_page, from_index, to_page, to_index}` (it
-swaps with a key already there, within one profile), `update_page {page, page_name, position}`,
+swaps with a key already there, within one profile), `copy_key {from_page, from_index, to_page,
+to_index}` (a copy that replaces a key already there, within one profile), `update_page {page, page_name, position}`,
 `duplicate_page {page, name}`, `delete_page {page}` (not the home page), `set_home_page {page}`,
 `rename_profile {profile, profile_name}`, `duplicate_profile {profile, name}`,
 `delete_profile {profile}` (not the last one), `move_profile {profile, index}`, `link_app`,

@@ -40,7 +40,8 @@ fn kind_of(err: &CommandError) -> ErrorKind {
         CommandError::InvalidKey(_)
         | CommandError::UnknownProfile(_)
         | CommandError::UnknownPage(_)
-        | CommandError::UnknownPlacement(_) => ErrorKind::NotFound,
+        | CommandError::UnknownPlacement(_)
+        | CommandError::EmptyKey(_) => ErrorKind::NotFound,
         CommandError::NoActiveProfile | CommandError::DeleteHome => ErrorKind::Conflict,
         CommandError::LastProfile
         | CommandError::AppAlreadyLinked { .. }

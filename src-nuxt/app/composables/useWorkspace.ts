@@ -14,6 +14,11 @@ let arrowColumn: { page: string, index: number, column: number } | null = null
 /** A dialog of the inspector to open for a key: its type's settings, or the choice of its type. */
 const keyRequest = shallowRef<KeyRef & { open: 'setup' | 'type' } | null>(null)
 
+/** Asks the canvas to bring a page into view. */
+export function focusPage(page: string) {
+  focusRequest.value = { page, count: (focusRequest.value?.count ?? 0) + 1 }
+}
+
 /** What the user is looking at and editing, shared by the canvas, the sidebar and the inspector. */
 export function useWorkspace() {
   const { snapshot } = useEngine()
@@ -79,15 +84,11 @@ export function useWorkspace() {
     keyRequest.value = { page, index, open: 'type' }
   }
 
-  function focus(page: string) {
-    focusRequest.value = { page, count: (focusRequest.value?.count ?? 0) + 1 }
-  }
-
   watch(pages, (list) => {
     if (selection.value && !list.some(p => p.id === selection.value!.page)) {
       selection.value = null
     }
   })
 
-  return { selection, selectedLink, focusRequest, keyRequest, pages, current, select, selectLink, clear, focus, moveSelection, removeSelectedKey, setUpKey, changeKeyType }
+  return { selection, selectedLink, focusRequest, keyRequest, pages, current, select, selectLink, clear, focus: focusPage, moveSelection, removeSelectedKey, setUpKey, changeKeyType }
 }
