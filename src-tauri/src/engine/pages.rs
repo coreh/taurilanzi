@@ -224,7 +224,10 @@ impl Engine {
             id: None,
         };
         let id = self.create_page(new, None, new_page)?;
-        let fresh = self.owner(id)?.page(id).ok_or(CommandError::UnknownPage(id))?;
+        let fresh = self
+            .owner(id)?
+            .page(id)
+            .ok_or(CommandError::UnknownPage(id))?;
         let index = if from.index == WIDE_KEY {
             WIDE_KEY
         } else {
@@ -274,7 +277,10 @@ fn place(index: u8) -> (i32, i32) {
     if index == WIDE_KEY {
         (7, 4)
     } else {
-        (i32::from(index % COLUMNS) * 2, i32::from(index / COLUMNS) * 2)
+        (
+            i32::from(index % COLUMNS) * 2,
+            i32::from(index / COLUMNS) * 2,
+        )
     }
 }
 
