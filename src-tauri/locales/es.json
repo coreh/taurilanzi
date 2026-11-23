@@ -2,11 +2,25 @@
   "menu": {
     "app": {
       "about": "Acerca de {name}",
+      "settings": "Ajustes…",
+      "account": "Cuenta…",
+      "mcp": "IA · MCP…",
       "services": "Servicios",
       "hide": "Ocultar {name}",
       "hideOthers": "Ocultar otros",
       "showAll": "Mostrar todo",
       "quit": "Salir de {name}"
+    },
+    "file": {
+      "title": "Archivo",
+      "newPage": "Nueva página",
+      "newProfile": "Nuevo perfil",
+      "pluginStore": "Tienda de plugins…",
+      "installPluginFile": "Instalar plugin desde un archivo…",
+      "installPluginFolder": "Instalar plugin desde una carpeta…",
+      "reloadPlugins": "Buscar plugins nuevos",
+      "showPluginsFolder": "Abrir la carpeta de plugins",
+      "close": "Cerrar ventana"
     },
     "edit": {
       "title": "Edición",
@@ -17,10 +31,32 @@
       "paste": "Pegar",
       "selectAll": "Seleccionar todo"
     },
+    "view": {
+      "title": "Visualización",
+      "zoomIn": "Ampliar",
+      "zoomOut": "Reducir",
+      "actualSize": "Tamaño real",
+      "fit": "Ver todas las páginas",
+      "pageOnDock": "Mostrar la página del dock",
+      "fullScreen": "Pantalla completa"
+    },
+    "dock": {
+      "title": "Dock",
+      "nextProfile": "Perfil siguiente",
+      "previousProfile": "Perfil anterior",
+      "pause": "Pausar el dock"
+    },
     "window": {
       "title": "Ventana",
       "minimize": "Minimizar",
-      "close": "Cerrar ventana"
+      "zoom": "Zoom",
+      "bringAllToFront": "Traer todo al frente"
+    },
+    "help": {
+      "title": "Ayuda",
+      "website": "Sitio web de {name}",
+      "releaseNotes": "Notas de las versiones",
+      "reportIssue": "Informar de un problema…"
     }
   },
   "tray": {

@@ -6,6 +6,7 @@ const { t } = useI18n()
 const cloud = useCloud()
 const mcp = useMcp()
 const mcpOpen = ref(false)
+useMenuCommand('app.mcp', () => { mcpOpen.value = true })
 
 const mcpMark = computed(() => ({
   off: { color: 'bg-neutral-500', text: t('shell.sidebar.mcpOff') },

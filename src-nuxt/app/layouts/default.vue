@@ -10,6 +10,7 @@ function blockNativeMenu(event: MouseEvent) {
 }
 
 useHistory()
+useAppMenu()
 
 onMounted(() => window.addEventListener('contextmenu', blockNativeMenu))
 onBeforeUnmount(() => window.removeEventListener('contextmenu', blockNativeMenu))

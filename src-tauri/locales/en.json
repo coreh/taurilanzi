@@ -2,11 +2,25 @@
   "menu": {
     "app": {
       "about": "About {name}",
+      "settings": "Settings…",
+      "account": "Account…",
+      "mcp": "AI · MCP…",
       "services": "Services",
       "hide": "Hide {name}",
       "hideOthers": "Hide Others",
       "showAll": "Show All",
       "quit": "Quit {name}"
+    },
+    "file": {
+      "title": "File",
+      "newPage": "New Page",
+      "newProfile": "New Profile",
+      "pluginStore": "Plugin Store…",
+      "installPluginFile": "Install Plugin from a File…",
+      "installPluginFolder": "Install Plugin from a Folder…",
+      "reloadPlugins": "Look for New Plugins",
+      "showPluginsFolder": "Open the Plugins Folder",
+      "close": "Close Window"
     },
     "edit": {
       "title": "Edit",
@@ -17,10 +31,32 @@
       "paste": "Paste",
       "selectAll": "Select All"
     },
+    "view": {
+      "title": "View",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "actualSize": "Actual Size",
+      "fit": "Show All Pages",
+      "pageOnDock": "Show the Page on the Dock",
+      "fullScreen": "Enter Full Screen"
+    },
+    "dock": {
+      "title": "Dock",
+      "nextProfile": "Next Profile",
+      "previousProfile": "Previous Profile",
+      "pause": "Pause the Dock"
+    },
     "window": {
       "title": "Window",
       "minimize": "Minimize",
-      "close": "Close Window"
+      "zoom": "Zoom",
+      "bringAllToFront": "Bring All to Front"
+    },
+    "help": {
+      "title": "Help",
+      "website": "{name} Website",
+      "releaseNotes": "Release Notes",
+      "reportIssue": "Report an Issue…"
     }
   },
   "tray": {

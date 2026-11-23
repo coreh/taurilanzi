@@ -2,8 +2,8 @@ use tauri::Wry;
 use tauri::ipc::Invoke;
 
 use super::{
-    assets, cloud, commands, events, hass, http, integrations, mcp, obs, plugins, profiles, system,
-    updates,
+    assets, cloud, commands, events, hass, http, integrations, mcp, menu, obs, plugins, profiles,
+    system, updates,
 };
 
 /// Typed commands and events, shared by the app and the TypeScript export.
@@ -83,13 +83,14 @@ pub fn builder() -> tauri_specta::Builder<Wry> {
             mcp::mcp_status,
             mcp::set_mcp_enabled,
             mcp::regenerate_mcp_token,
+            menu::set_menu_context,
         ])
         .events(tauri_specta::collect_events![
             events::StateChanged,
             events::KeyChanged,
             events::KeyImageChanged,
             events::PluginToast,
-            events::HistoryShortcut,
+            events::MenuCommand,
             events::UpdateOffered,
             events::CloudChanged,
             events::McpChanged,

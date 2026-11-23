@@ -22,7 +22,7 @@ const { snapshot, refresh } = useEngine()
 const { pages, current, focusRequest, selection, clear, moveSelection, removeSelectedKey } = useWorkspace()
 const actions = usePages()
 const colors = useLinkColors()
-const { fitView, screenToFlowCoordinate } = useVueFlow(FLOW)
+const { fitView, screenToFlowCoordinate, zoomIn, zoomOut, zoomTo } = useVueFlow(FLOW)
 const contextMenu = useContextMenu()
 const history = useHistory()
 const { t } = useI18n()
@@ -198,6 +198,13 @@ onBeforeUnmount(() => window.removeEventListener('keydown', keydown, true))
 function focusPage(page: string) {
   fitView({ nodes: [page], padding: 0.3, maxZoom: 1.2, duration: 300 })
 }
+
+useMenuCommand('file.newPage', addPage)
+useMenuCommand('view.zoomIn', () => zoomIn({ duration: 200 }))
+useMenuCommand('view.zoomOut', () => zoomOut({ duration: 200 }))
+useMenuCommand('view.actualSize', () => zoomTo(1, { duration: 200 }))
+useMenuCommand('view.fit', () => fitView({ padding: 0.2, duration: 300 }))
+useMenuCommand('view.pageOnDock', () => current.value && focusPage(current.value))
 
 watch(focusRequest, (request) => {
   if (request) {

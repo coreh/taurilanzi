@@ -160,16 +160,18 @@ export const commands = {
 	setMcpEnabled: (enabled: boolean) => typedError<McpStatus, null>(__TAURI_INVOKE("set_mcp_enabled", { enabled })),
 	/**  Assistants given the old token are let in no more. */
 	regenerateMcpToken: () => typedError<McpStatus, null>(__TAURI_INVOKE("regenerate_mcp_token")),
+	/**  Only macOS has a menu bar of the app's; elsewhere the window keeps it to itself. */
+	setMenuContext: (context: MenuContext) => __TAURI_INVOKE<void>("set_menu_context", { context }),
 };
 
 /** Events */
 export const events = {
 	assistantEdited: makeEvent<AssistantEdited, AssistantEdited>("assistant-edited"),
 	cloudChanged: makeEvent<CloudChanged, CloudChanged>("cloud-changed"),
-	historyShortcut: makeEvent<HistoryShortcut, HistoryShortcut>("history-shortcut"),
 	keyChanged: makeEvent<KeyChanged, KeyChanged>("key-changed"),
 	keyImageChanged: makeEvent<KeyImageChanged, KeyImageChanged>("key-image-changed"),
 	mcpChanged: makeEvent<McpChanged, McpChanged>("mcp-changed"),
+	menuCommand: makeEvent<MenuCommand, MenuCommand>("menu-command"),
 	pluginRecommended: makeEvent<PluginRecommended, PluginRecommended>("plugin-recommended"),
 	pluginToast: makeEvent<PluginToast, PluginToast>("plugin-toast"),
 	stateChanged: makeEvent<StateChanged, StateChanged>("state-changed"),
@@ -596,11 +598,6 @@ export type HassTarget = {
 	labels?: string[],
 };
 
-/**  ⌘Z or ⌘⇧Z from the menu. The UI decides whether it undoes text being typed or an edit. */
-export type HistoryShortcut = {
-	redo: boolean,
-};
-
 export type HttpBody = { type: "none" } | { type: "json"; json: string } | { type: "text"; text: string; content_type: string } | 
 /**  Sent as `application/x-www-form-urlencoded`. */
 { type: "form"; fields: HttpPair[] };
@@ -773,6 +770,25 @@ export type McpStatus = {
 };
 
 export type MediaKey = "play_pause" | "next" | "previous" | "volume_up" | "volume_down" | "mute" | "brightness_up" | "brightness_down";
+
+/**
+ *  An item of the menu bar that the window carries out, such as undo, a new page or zooming the
+ *  canvas. `command` names it (`edit.undo`, `file.newPage`…).
+ */
+export type MenuCommand = {
+	command: string,
+};
+
+/**  What the window is showing, for the menu bar to enable only what can be done there. */
+export type MenuContext = {
+	/**  Undo would take something back: typing, an edit not saved yet or one in the history. */
+	undo: boolean,
+	redo: boolean,
+	/**  The canvas of pages is on screen. */
+	editor: boolean,
+	/**  A key is selected on the canvas. */
+	key: boolean,
+};
 
 export type Metric = "cpu" | "ram" | "gpu" | 
 /**  How full the startup volume is. */

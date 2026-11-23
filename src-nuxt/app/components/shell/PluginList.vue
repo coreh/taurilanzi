@@ -13,6 +13,7 @@ const { t } = useI18n()
 const { recommendation } = useMcp()
 const contextMenu = useContextMenu()
 const browsing = ref(false)
+useMenuCommand('file.pluginStore', () => { browsing.value = true })
 
 watch(recommendation, (plugin) => {
   if (plugin) {

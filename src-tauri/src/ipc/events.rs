@@ -13,10 +13,11 @@ use crate::updates::UpdateOffer;
 #[derive(Debug, Clone, Serialize, specta::Type, tauri_specta::Event)]
 pub struct StateChanged(pub Arc<Snapshot>);
 
-/// ⌘Z or ⌘⇧Z from the menu. The UI decides whether it undoes text being typed or an edit.
+/// An item of the menu bar that the window carries out, such as undo, a new page or zooming the
+/// canvas. `command` names it (`edit.undo`, `file.newPage`…).
 #[derive(Debug, Clone, Serialize, specta::Type, tauri_specta::Event)]
-pub struct HistoryShortcut {
-    pub redo: bool,
+pub struct MenuCommand {
+    pub command: String,
 }
 
 /// A plugin wants to tell the user something.

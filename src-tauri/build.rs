@@ -73,6 +73,7 @@ const COMMANDS: &[&str] = &[
     "mcp_status",
     "set_mcp_enabled",
     "regenerate_mcp_token",
+    "set_menu_context",
 ];
 
 fn main() {

@@ -119,6 +119,7 @@ function freeName() {
 function startCreate() {
   naming.value = { id: null, name: freeName() }
 }
+useMenuCommand('file.newProfile', startCreate)
 
 async function saveName() {
   const target = naming.value

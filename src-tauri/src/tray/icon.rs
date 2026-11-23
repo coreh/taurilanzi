@@ -70,38 +70,26 @@ fn on_state(app: &AppHandle, snapshot: Arc<crate::engine::Snapshot>) {
 /// Rebuilds the menu if what it shows changed. Rebuilding an open menu closes it under the
 /// pointer, so it must not happen otherwise.
 pub fn refresh(app: &AppHandle) {
+    #[cfg(target_os = "macos")]
+    crate::app_menu::refresh(app);
     let state = app.state::<AppState>();
     let model = Model::new(
         state.snapshot().as_deref(),
         &state.placement,
         state.updates.status(),
     );
-    let new_language = {
+    {
         let mut shown = state.menu.lock().expect("menu");
         if shown.as_ref() == Some(&model) {
             return;
         }
-        let language = |m: Option<&Model>| m.and_then(|m| m.dock.as_ref()).map(|d| d.language);
-        let changed = language(shown.as_ref()) != language(Some(&model));
         *shown = Some(model.clone());
-        changed
-    };
+    }
     let handle = app.clone();
     let _ = app.run_on_main_thread(move || {
         let Some(tray) = handle.tray_by_id(TRAY) else {
             return;
         };
-        #[cfg(not(target_os = "macos"))]
-        let _ = new_language;
-        #[cfg(target_os = "macos")]
-        if new_language {
-            match crate::app_menu::build(&handle) {
-                Ok(menu) => {
-                    let _ = handle.set_menu(menu);
-                }
-                Err(err) => log::warn!("app menu could not be built: {err}"),
-            }
-        }
         match menu::build(&handle, &model) {
             Ok(menu) => {
                 let _ = tray.set_menu(Some(menu));

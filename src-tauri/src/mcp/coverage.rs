@@ -180,6 +180,10 @@ const COVERAGE: &[(&str, Cover)] = &[
         "regenerate_mcp_token",
         Left("the MCP server itself: only the user turns it on and off"),
     ),
+    (
+        "set_menu_context",
+        Left("what the window shows, for its menu bar; it configures nothing"),
+    ),
 ];
 
 /// Files and the plugins' settings come through their own paths, not through commands.

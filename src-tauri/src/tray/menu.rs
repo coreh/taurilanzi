@@ -88,7 +88,7 @@ pub fn build(app: &AppHandle, model: &Model) -> tauri::Result<Menu<Wry>> {
         menu.append(&PredefinedMenuItem::separator(app)?)?;
     }
 
-    let (label, enabled) = updates_item(model);
+    let (label, enabled) = updates_item(model.managed, &model.update);
     menu.append(&MenuItem::with_id(
         app,
         UPDATES,
@@ -107,11 +107,12 @@ pub fn build(app: &AppHandle, model: &Model) -> tauri::Result<Menu<Wry>> {
     Ok(menu)
 }
 
-fn updates_item(model: &Model) -> (String, bool) {
-    if !model.managed {
+/// The text of the updates item and whether it can be clicked; the app menu shows the same.
+pub fn updates_item(managed: bool, update: &Status) -> (String, bool) {
+    if !managed {
         return (tr!("tray.updates.onlyInstalled").into(), false);
     }
-    match &model.update {
+    match update {
         Status::Idle => (tr!("tray.updates.check").into(), true),
         Status::Checking => (tr!("tray.updates.checking").into(), false),
         Status::UpToDate => (tr!("tray.updates.upToDate").into(), true),

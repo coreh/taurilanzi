@@ -75,4 +75,5 @@ permissions = [
   "allow-mcp-status",
   "allow-set-mcp-enabled",
   "allow-regenerate-mcp-token",
+  "allow-set-menu-context",
 ]
